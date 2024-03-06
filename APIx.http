@@ -1,0 +1,6 @@
+@APIx_HostAddress = http://localhost:5045
+
+GET {{APIx_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
