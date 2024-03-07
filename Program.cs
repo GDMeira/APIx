@@ -1,4 +1,5 @@
 using APIx.Data;
+using APIx.Middlewares;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,5 +38,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Middlewares
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.Run();
