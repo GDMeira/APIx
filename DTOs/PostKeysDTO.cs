@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using APIx.Models;
 
 namespace APIx.DTOs;
 
@@ -15,13 +16,13 @@ public class KeyDTO
     [Required]
     [EnumDataType(typeof(KeyType), ErrorMessage = "Invalid key type")]
     public required string Type { get; set; }
-    public string? Value { get; set; }
+    public required string Value { get; set; }
 }
 
 public class UserDTO
 {
     [Required]
-    [StringLength(11, MinimumLength = 11, ErrorMessage = "CPF must have 11 characters")]
+    [RegularExpression(@"^\d{11}$", ErrorMessage = "CPF must have 11 number digits")]
     public required string Cpf { get; set; }
 }
 
@@ -40,4 +41,19 @@ public class PostKeysDTO
     public required KeyDTO Key { get; set; }
     public required UserDTO User { get; set; }
     public required AccountDTO Account { get; set; }
+
+    public string GetUserCpf()
+    {
+        return User.Cpf;
+    }
+
+    public PixKey GetPixKey()
+    {
+        return new PixKey(Key.Type, Key.Value);
+    }
+
+    public PaymentProviderAccount GetPaymentProviderAccount()
+    {
+        return new PaymentProviderAccount(Account.Number, Account.Agency);
+    }
 }

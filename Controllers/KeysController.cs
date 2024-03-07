@@ -1,23 +1,21 @@
 using APIx.DTOs;
+using APIx.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIx.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class KeysController : ControllerBase
+public class KeysController(KeysService keysService) : ControllerBase
 {
-    [HttpPost(Name = "/")]
-    public IActionResult Post([FromBody] PostKeysDTO keys)
-    {
-        //mandar info pro service
-        //checar token
-        //checar se usuario existe e pegar suas keys (menos de 20 total, menos de 5 nesse banco)
-        //checar se a key já existe
-        //checar se a key é válida
-        //checar se a conta já existe (se n criar)
-        //criar key (talvez junto com a conta)
+    private readonly KeysService _keysService = keysService;
 
-        return Ok("I'm alive!");
+    [HttpPost(Name = "/")]
+    public async Task<IActionResult> Post([FromBody] PostKeysDTO postKeysDTO,
+                                        [FromHeader(Name = "Authorization")] string? authorization)
+    {
+        PostKeysDTO response = await _keysService.PostKeys(postKeysDTO, authorization);
+
+        return CreatedAtAction(nameof(Post), response);
     }
 }
