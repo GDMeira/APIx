@@ -144,7 +144,7 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
     [GeneratedRegex(@"^[0-9]{11}$")]
     private static partial Regex CpfRegex();
 
-    public async Task<ResGetKeysDTO> GetKeys(string? type, string? value, string? authorization)
+    public async Task<ResGetKeysDTO> GetKeys(string type, string value, string? authorization)
     {
         PaymentProvider paymentProvider = await PaymentProviderTokenValidate(authorization);
         ValidateKeyToRetrieval(type, value);
@@ -155,15 +155,9 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
                     pixKey.PaymentProviderAccount, paymentProvider);
     }
 
-    public void ValidateKeyToRetrieval(string? type, string? value)
+    public void ValidateKeyToRetrieval(string type, string value)
     {
-        System.Console.WriteLine(type);
-        Console.WriteLine(value);
-        if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(value))
-        {
-            throw new AppException(HttpStatusCode.BadRequest, "Type and value are required");
-        }
-        else if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
+        if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
         {
             throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid type");
         }        

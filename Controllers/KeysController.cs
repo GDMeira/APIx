@@ -1,3 +1,5 @@
+using System.Net;
+using APIx.Exceptions;
 using APIx.RequestDTOs;
 using APIx.ResponseDTOs;
 using APIx.Services;
@@ -24,6 +26,11 @@ public class KeysController(KeysService keysService) : ControllerBase
     public async Task<IActionResult> Get([FromRoute] string? type, [FromRoute] string? value,
                                         [FromHeader(Name = "Authorization")] string? authorization)
     {
+        if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(value))
+        {
+            throw new AppException(HttpStatusCode.BadRequest, "Type and value are required");
+        }
+        
         ResGetKeysDTO response = await _keysService.GetKeys(type, value, authorization);
 
         return Ok(response);
