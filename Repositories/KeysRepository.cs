@@ -21,4 +21,11 @@ public class KeysRepository(AppDBContext appDBContext)
         
         return entry.Entity;
     }
+
+    public async Task<PixKey?> RetrieveKeyByTypeAndValue(string type, string value)
+    {
+        return await _appDBContext.PixKey
+            .Include(p => p.PaymentProviderAccount.User)
+            .FirstOrDefaultAsync(p => p.Type == type && p.Value == value);
+    }
 }
