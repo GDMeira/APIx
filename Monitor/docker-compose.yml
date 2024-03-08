@@ -5,7 +5,7 @@ services:
     command:
       - '--path.rootfs=/host'
     pid: host
-    ports: 
+    ports:
       - 9100:9100
     restart: unless-stopped
     volumes:
@@ -22,10 +22,33 @@ services:
   grafana:
     container_name: grafana
     image: grafana/grafana:latest
-    ports: 
+    ports:
       - 3000:3000
     volumes:
       - grafana:/var/lib/grafana
 
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    ports:
+      - 9187:9187
+    environment:
+      - DATA_SOURCE_URI=postgres:5432/postgres?sslmode=disable
+      - DATA_SOURCE_USER=postgres
+      - DATA_SOURCE_PASS=postgres
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - 5433:5432 # Map host port 5433 to container port 5432 (default for postgres)
+    environment:
+      - POSTGRES_PASSWORD=postgres # Set password for postgres user (replace with desired password)
+      - POSTGRES_USER=postgres # Default postgres user
+      - POSTGRES_DB=postgres # Default postgres database
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 volumes:
   grafana:
+  postgres_data:
