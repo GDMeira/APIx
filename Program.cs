@@ -4,6 +4,7 @@ using APIx.Repositories;
 using APIx.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +66,10 @@ builder.Services.AddScoped<AccountsRepository>();
 
 var app = builder.Build();
 
+// Monitoring and Metrics
+app.UseMetricServer();
+app.UseHttpMetrics(options => options.AddCustomLabel("host", context => context.Request.Host.Host));
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -77,6 +82,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapMetrics();
 
 // Middlewares
 app.UseMiddleware<ExceptionHandlingMiddleware>();

@@ -49,6 +49,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  apix:
+    image: dotnetapi:latest
+    container_name: apix
+    ports:
+      - 5045:5045
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    
 volumes:
   grafana:
   postgres_data:
