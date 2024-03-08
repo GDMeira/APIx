@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.RegularExpressions;
-using APIx.DTOs;
+using APIx.RequestDTOs;
+using APIx.ResponseDTOs;
 using APIx.Exceptions;
 using APIx.Helpers;
 using APIx.Models;
@@ -15,7 +16,7 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
     private readonly UsersRepository _usersRepository = usersRepository;
     private readonly KeysRepository _keysRepository = keysRepository;
     private readonly AccountsRepository _accountsRepository = accountsRepository;
-    public async Task<PostKeysDTO> PostKeys(PostKeysDTO postKeysDTO, string? authorization)
+    public async Task<ResPostKeysDTO> PostKeys(ReqPostKeysDTO postKeysDTO, string? authorization)
     {
         PaymentProvider paymentProvider = await PaymentProviderTokenValidate(authorization);
         string userCpf = postKeysDTO.GetUserCpf();
@@ -26,19 +27,7 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
             paymentProvider.Id, user.Id);
         pixKey.PaymentProviderAccountId = paymentProviderAccount.Id;
         PixKey newPixKey = await CreateKey(pixKey);
-        var response = new PostKeysDTO{
-            Key = new KeyDTO{
-                Type = newPixKey.Type,
-                Value = newPixKey.Value
-            },
-            User = new UserDTO{
-                Cpf = user.Cpf
-            },
-            Account = new AccountDTO{
-                Number = paymentProviderAccount.Number,
-                Agency = paymentProviderAccount.Agency
-            }
-        };
+        var response = new ResPostKeysDTO(newPixKey, user, paymentProviderAccount);
 
         return response;
     }
