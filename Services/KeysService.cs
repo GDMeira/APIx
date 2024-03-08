@@ -22,7 +22,7 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
         string userCpf = postKeysDTO.GetUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postKeysDTO.GetPixKey();
-        await ValidateKey(pixKey, user, paymentProvider.Id);
+        await ValidateKeyToCreation(pixKey, user, paymentProvider.Id);
         PaymentProviderAccount paymentProviderAccount = await RetrieveOrCreateAccount(postKeysDTO.GetPaymentProviderAccount(),
             paymentProvider.Id, user.Id);
         pixKey.PaymentProviderAccountId = paymentProviderAccount.Id;
@@ -59,7 +59,7 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
             throw new AppException(HttpStatusCode.NotFound, "User not found");
     }
 
-    public async Task ValidateKey(PixKey pixKey, User user, int paymentProviderId)
+    public async Task ValidateKeyToCreation(PixKey pixKey, User user, int paymentProviderId)
     {
         if (pixKey.Type == "CPF" && pixKey.Value != user.Cpf)
         {
@@ -137,4 +137,51 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
 
     [GeneratedRegex(@"^(\+)([0-9]{13})$")]
     private static partial Regex PhoneRegex();
+
+    [GeneratedRegex(@"^([A-Za-z0-9]{8})-([A-Za-z0-9]{4})-([A-Za-z0-9]{4})-([A-Za-z0-9]{4})-([A-Za-z0-9]{12})$")]
+    private static partial Regex RandomKeyRegex();
+
+    [GeneratedRegex(@"^[0-9]{11}$")]
+    private static partial Regex CpfRegex();
+
+    public async Task<ResGetKeysDTO> GetKeys(string? type, string? value, string? authorization)
+    {
+        PaymentProvider paymentProvider = await PaymentProviderTokenValidate(authorization);
+        ValidateKeyToRetrieval(type, value);
+        PixKey pixKey = await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??
+            throw new AppException(HttpStatusCode.NotFound, "Key not found");
+
+        return new ResGetKeysDTO(pixKey, pixKey.PaymentProviderAccount.User,
+                    pixKey.PaymentProviderAccount, paymentProvider);
+    }
+
+    public void ValidateKeyToRetrieval(string? type, string? value)
+    {
+        System.Console.WriteLine(type);
+        Console.WriteLine(value);
+        if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(value))
+        {
+            throw new AppException(HttpStatusCode.BadRequest, "Type and value are required");
+        }
+        else if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
+        {
+            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid type");
+        }        
+        else if (type == "CPF" && !CpfRegex().IsMatch(value))
+        {
+            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid CPF");
+        }
+        else if (type == "Email" && !EmailRegex().IsMatch(value))
+        {
+            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid email");
+        }
+        else if (type == "Phone" && !PhoneRegex().IsMatch(value))
+        {
+            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid phone");
+        }
+        else if (type == "Random" && !RandomKeyRegex().IsMatch(value))
+        {
+            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid random key");
+        }
+    }
 }
