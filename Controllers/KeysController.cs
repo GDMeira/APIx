@@ -20,12 +20,12 @@ public class KeysController(KeysService keysService) : ControllerBase
         return CreatedAtAction(nameof(Post), response);
     }
 
-    [HttpGet(Name = "/:type/:value")]
+    [HttpGet("/{type}/{value}")]
     public async Task<IActionResult> Get([FromRoute] string? type, [FromRoute] string? value,
                                         [FromHeader(Name = "Authorization")] string? authorization)
     {
-        GetKeysDTO response = await _keysService.GetKeys(type, value, authorization);
+        ResGetKeysDTO response = await _keysService.GetKeys(type, value, authorization);
 
-        return CreatedAtAction(nameof(Get), response);
+        return Ok(response);
     }
 }
