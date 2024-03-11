@@ -12,7 +12,6 @@ namespace APIx.Services;
 public partial class KeysService(AuthRepository authRepository, UsersRepository usersRepository,
     KeysRepository keysRepository, AccountsRepository accountsRepository)
 {
-    private readonly AuthRepository _authRepository = authRepository;
     private readonly UsersRepository _usersRepository = usersRepository;
     private readonly KeysRepository _keysRepository = keysRepository;
     private readonly AccountsRepository _accountsRepository = accountsRepository;
@@ -33,7 +32,6 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
 
     public async Task<User> ValidateUser(string userCpf)
     {
-        System.Console.WriteLine(userCpf);
         return await _usersRepository.RetrieveUserByCpf(userCpf) ??
             throw new AppException(HttpStatusCode.NotFound, "User not found");
     }
