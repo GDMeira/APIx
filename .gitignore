@@ -1,2 +1,5 @@
 bin/
 obj/
+**/.env
+**/node_modules
+.k6/seed/*.json

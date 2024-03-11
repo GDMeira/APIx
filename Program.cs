@@ -1,9 +1,12 @@
 using APIx.Data;
+using APIx.Helpers;
 using APIx.Middlewares;
 using APIx.Repositories;
 using APIx.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +26,11 @@ builder.Services.AddDbContext<AppDBContext>(opts =>
 });
 
 builder.Services.AddControllers();
+
+// Authentication
+builder.Services.AddAuthentication("BearerAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt => 
@@ -65,6 +73,10 @@ builder.Services.AddScoped<AccountsRepository>();
 
 var app = builder.Build();
 
+// Monitoring and Metrics
+app.UseMetricServer();
+app.UseHttpMetrics(options => options.AddCustomLabel("host", context => context.Request.Host.Host));
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -77,6 +89,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapMetrics();
 
 // Middlewares
 app.UseMiddleware<ExceptionHandlingMiddleware>();

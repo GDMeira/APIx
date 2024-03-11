@@ -1,0 +1,14 @@
+{
+  "description": "",
+  "scripts": {
+    "seed": "node ./seed/seedUser.js && node ./seed/seedPaymentProvider.js",
+    "test:post-keys": "k6 run ./tests/postKeysTest.js"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "dotenv": "^16.4.5",
+    "knex": "^3.1.0",
+    "pg": "^8.11.3",
+    "uuid": "^9.0.1"
+  }
+}
