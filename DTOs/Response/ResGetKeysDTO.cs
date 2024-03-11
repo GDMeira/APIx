@@ -11,7 +11,12 @@ public class KeyDTOGetKeys(string type, string value)
 public class UserDTOGetKeys(string name, string cpf)
 {
     public string Name { get; set; } = name;
-    public string Cpf { get; set; } = cpf;
+    public string MaskedCpf { get; set; } = MaskCpf(cpf);
+
+    public static string MaskCpf(string cpf)
+    {
+        return string.Concat(cpf.AsSpan(0, 3), "***.***.***-", cpf.AsSpan(9, 2));
+    }
 }
 
 public class AccountDTOGetKeys(string number, string agency, string bankName, string bankId)
