@@ -34,7 +34,7 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
 
     public async Task<PaymentProvider> PaymentProviderTokenValidate(string? authorization)
     {
-        if (authorization == null)
+        if (string.IsNullOrEmpty(authorization))
         {
             throw new AppException(HttpStatusCode.Unauthorized, "Token not found");
         }
