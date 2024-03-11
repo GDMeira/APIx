@@ -2,8 +2,8 @@ import http from 'k6/http';
 import { SharedArray } from 'k6/data';
 
 export const options = {
-    vus: 10000, //virtual users
-    duration: '15s'
+    vus: 1000, //virtual users
+    duration: '5s'
 }
 
 const data = new SharedArray('users', () => JSON.parse(open("../seed/existing_users.json")));
@@ -34,6 +34,7 @@ export default function () {
     if (response.status !== 201) {
         console.log(`Error creating key: ${response.status} ${response.body}`);
         console.log(body);
+        console.log(headers);
     }
 
     function generateRandomKey(user) {

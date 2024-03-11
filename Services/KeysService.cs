@@ -102,6 +102,14 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
             paymentProviderAccount.UserId = userId;
             paymentProviderAccountFromDb = await _accountsRepository
                                                     .CreateAccount(paymentProviderAccount);
+        } 
+        
+        if (paymentProviderAccountFromDb.PaymentProviderId != paymentProviderId)
+        {
+            throw new AppException(HttpStatusCode.BadRequest, "Account already exists with another payment provider");
+        } else if (paymentProviderAccountFromDb.UserId != userId)
+        {
+            throw new AppException(HttpStatusCode.BadRequest, "Account already exists with another user");
         }
 
         return paymentProviderAccountFromDb;
