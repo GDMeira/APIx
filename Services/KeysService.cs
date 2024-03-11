@@ -16,40 +16,19 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
     private readonly UsersRepository _usersRepository = usersRepository;
     private readonly KeysRepository _keysRepository = keysRepository;
     private readonly AccountsRepository _accountsRepository = accountsRepository;
-    public async Task<ResPostKeysDTO> PostKeys(ReqPostKeysDTO postKeysDTO, string? authorization)
+    public async Task<ResPostKeysDTO> PostKeys(ReqPostKeysDTO postKeysDTO, int paymentProviderId)
     {
-        PaymentProvider paymentProvider = await PaymentProviderTokenValidate(authorization);
         string userCpf = postKeysDTO.GetUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postKeysDTO.GetPixKey();
-        await ValidateKeyToCreation(pixKey, user, paymentProvider.Id);
+        await ValidateKeyToCreation(pixKey, user, paymentProviderId);
         PaymentProviderAccount paymentProviderAccount = await RetrieveOrCreateAccount(postKeysDTO.GetPaymentProviderAccount(),
-            paymentProvider.Id, user.Id);
+            paymentProviderId, user.Id);
         pixKey.PaymentProviderAccountId = paymentProviderAccount.Id;
         PixKey newPixKey = await CreateKey(pixKey);
         var response = new ResPostKeysDTO(newPixKey, user, paymentProviderAccount);
 
         return response;
-    }
-
-    public async Task<PaymentProvider> PaymentProviderTokenValidate(string? authorization)
-    {
-        if (string.IsNullOrEmpty(authorization))
-        {
-            throw new AppException(HttpStatusCode.Unauthorized, "Token not found");
-        }
-
-        string token = authorization.Split(" ")[1]; //Bearer token
-
-        if (string.IsNullOrEmpty(token))
-        {
-            throw new AppException(HttpStatusCode.Unauthorized, "Token not found");
-        }
-
-        PaymentProvider paymentProvider = await _authRepository.RetrievePaymentProviderByToken(token) ??
-            throw new AppException(HttpStatusCode.Unauthorized, "Invalid token");
-
-        return paymentProvider;
     }
 
     public async Task<User> ValidateUser(string userCpf)
@@ -154,13 +133,12 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
 
     public async Task<ResGetKeysDTO> GetKeys(string type, string value, string? authorization)
     {
-        PaymentProvider paymentProvider = await PaymentProviderTokenValidate(authorization);
         ValidateKeyToRetrieval(type, value);
         PixKey pixKey = await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??
             throw new AppException(HttpStatusCode.NotFound, "Key not found");
 
         return new ResGetKeysDTO(pixKey, pixKey.PaymentProviderAccount.User,
-                    pixKey.PaymentProviderAccount, paymentProvider);
+                    pixKey.PaymentProviderAccount, pixKey.PaymentProviderAccount.PaymentProvider);
     }
 
     public void ValidateKeyToRetrieval(string type, string value)

@@ -1,7 +1,9 @@
 using APIx.Data;
+using APIx.Helpers;
 using APIx.Middlewares;
 using APIx.Repositories;
 using APIx.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Prometheus;
@@ -24,6 +26,11 @@ builder.Services.AddDbContext<AppDBContext>(opts =>
 });
 
 builder.Services.AddControllers();
+
+// Authentication
+builder.Services.AddAuthentication("BearerAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt => 

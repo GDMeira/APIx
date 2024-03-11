@@ -26,6 +26,7 @@ public class KeysRepository(AppDBContext appDBContext)
     {
         return await _appDBContext.PixKey
             .Include(p => p.PaymentProviderAccount.User)
+            .Include(p => p.PaymentProviderAccount.PaymentProvider)
             .FirstOrDefaultAsync(p => p.Type == type && p.Value == value);
     }
 }
