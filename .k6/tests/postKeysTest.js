@@ -3,7 +3,7 @@ import { SharedArray } from 'k6/data';
 
 export const options = {
     vus: 1000, //virtual users
-    duration: '5s'
+    duration: '10s'
 }
 
 const data = new SharedArray('users', () => JSON.parse(open("../seed/existing_users.json")));
