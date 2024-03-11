@@ -14,7 +14,10 @@ const ERASE_DATA = true;
 
 async function run() {
   if (ERASE_DATA) {
+    await knex("PixKey").del();
+    await knex("PaymentProviderAccount").del();
     await knex("User").del();
+    await knex("PaymentProvider").del();
   }
 
   const start = new Date();
