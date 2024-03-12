@@ -79,6 +79,11 @@ public partial class KeysService(UsersRepository usersRepository,
             throw new AppException(HttpStatusCode.BadRequest, "User already has 5 keys with this payment provider");
         }
 
+        if (pixKeysFromSameProvider.FirstOrDefault(p => p.Value == pixKey.Value) != null)
+        {
+            throw new AppException(HttpStatusCode.Conflict, "User already has this key");
+        }
+
         return pixKeys;
     }
 
