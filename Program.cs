@@ -1,3 +1,4 @@
+using APIx.Config;
 using APIx.Data;
 using APIx.Helpers;
 using APIx.Middlewares;
@@ -70,6 +71,10 @@ builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<UsersRepository>();
 builder.Services.AddScoped<KeysRepository>();
 builder.Services.AddScoped<AccountsRepository>();
+
+// configs
+IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
+builder.Services.Configure<QueueConfig>(queueConfig);
 
 var app = builder.Build();
 

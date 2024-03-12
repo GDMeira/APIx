@@ -177,7 +177,7 @@ public partial class KeysService(UsersRepository usersRepository,
     [GeneratedRegex(@"^[0-9]{11}$")]
     private static partial Regex CpfRegex();
 
-    public async Task<ResGetKeysDTO> GetKeys(string type, string value, string? authorization)
+    public async Task<ResGetKeysDTO> GetKeys(string type, string value)
     {
         ValidateKeyToRetrieval(type, value);
         PixKey pixKey = await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??

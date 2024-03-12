@@ -56,7 +56,17 @@ services:
       - 5045:5045
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+
+  rabbitmq:
+    image: rabbitmq:3.12.12-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     
 volumes:
   grafana:
   postgres_data:
+  rabbitmq_data:
