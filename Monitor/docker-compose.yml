@@ -51,6 +51,9 @@ services:
 
   apix:
     image: dotnetapi:latest
+    build: 
+      context: ../.
+      dockerfile: Dockerfile
     container_name: apix
     ports:
       - 5045:5045
