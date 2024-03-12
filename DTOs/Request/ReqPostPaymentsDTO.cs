@@ -45,13 +45,8 @@ public class ReqPostPaymentsDTO
         return new PixKey(Destiny.Key.Type, Destiny.Key.Value);
     }
 
-    public int GetPaymentAmount()
+    public Payment GetPayment()
     {
-        return Amount;
-    }
-
-    public string? GetPaymentDescription()
-    {
-        return Description;
+        return new Payment(Amount, Description);
     }
 }

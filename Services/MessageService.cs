@@ -1,5 +1,6 @@
 using System.Text.Json;
 using APIx.Config;
+using APIx.Models;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
@@ -8,7 +9,7 @@ namespace APIx.Services;
 public class MessageService(IOptions<QueueConfig> queueConfig)
 {
     private readonly QueueConfig _queueConfig = queueConfig.Value;
-    public void SendMessage(string message)
+    public void SendMessage(Payment payment)
     {
         ConnectionFactory factory = new()
         {
@@ -26,7 +27,7 @@ public class MessageService(IOptions<QueueConfig> queueConfig)
             arguments: null
         );
 
-        var body = JsonSerializer.SerializeToUtf8Bytes(message);
+        var body = JsonSerializer.SerializeToUtf8Bytes(payment);
 
         channel.BasicPublish(
             exchange: "",

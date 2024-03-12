@@ -65,6 +65,7 @@ builder.Services.AddSwaggerGen(opt =>
 // Services
 builder.Services.AddScoped<KeysService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<PaymentsService>();
 
 // Repositories
 builder.Services.AddScoped<AuthRepository>();

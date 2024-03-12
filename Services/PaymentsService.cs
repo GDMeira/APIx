@@ -4,26 +4,35 @@ using APIx.RequestDTOs;
 using APIx.Exceptions;
 using APIx.Models;
 using APIx.Repositories;
+using APIx.ResponseDTOs;
 
 namespace APIx.Services;
 
 public partial class PaymentsService(UsersRepository usersRepository,
-    MessageService messageService, AccountsRepository accountsRepository)
+    MessageService messageService, AccountsRepository accountsRepository,
+    KeysRepository keysRepository, PaymentsRepository paymentsRepository)
 {
     private readonly UsersRepository _usersRepository = usersRepository;
     private readonly MessageService _messageService = messageService;
     private readonly AccountsRepository _accountsRepository = accountsRepository;
-    public async Task PostPayment(ReqPostPaymentsDTO postPaymentsDTO, int paymentProviderId)
+    private readonly KeysRepository _keysRepository = keysRepository;
+    private readonly PaymentsRepository _paymentsRepository = paymentsRepository;
+    public async Task<ResPostPaymentsDTO> PostPayment(ReqPostPaymentsDTO postPaymentsDTO, int paymentProviderId)
     {
         string userCpf = postPaymentsDTO.GetOriginUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postPaymentsDTO.GetDestinyPixKey();
-        ValidateKeyToRetrieval(pixKey.Type, pixKey.Value);
+        PixKey pixKeyDB = await ValidateKeyToRetrieval(pixKey.Type, pixKey.Value);
         PaymentProviderAccount paymentProviderAccountOrigin = postPaymentsDTO.GetOriginPaymentProviderAccount();
         PaymentProviderAccount accountDB = await RetrieveOrCreateAccount(paymentProviderAccountOrigin, paymentProviderId, user.Id);
+        Payment payment = postPaymentsDTO.GetPayment();
+        payment.PixKeyId = pixKeyDB.Id;
+        payment.PaymentProviderAccountId = accountDB.Id;
+        Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
         // mandar a requisição pra fila
-        _messageService.SendMessage("olá meu chapa");
+        _messageService.SendMessage(paymentDB);
         
+        return new ResPostPaymentsDTO(paymentDB);
     }
 
     public async Task<User> ValidateUser(string userCpf)
@@ -71,7 +80,7 @@ public partial class PaymentsService(UsersRepository usersRepository,
     [GeneratedRegex(@"^[0-9]{11}$")]
     private static partial Regex CpfRegex();
 
-   public void ValidateKeyToRetrieval(string type, string value)
+   public async Task<PixKey> ValidateKeyToRetrieval(string type, string value)
     {
         if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
         {
@@ -93,5 +102,8 @@ public partial class PaymentsService(UsersRepository usersRepository,
         {
             throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid random key");
         }
+
+        return await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??
+            throw new AppException(HttpStatusCode.NotFound, "Key not found");
     }    
 }
