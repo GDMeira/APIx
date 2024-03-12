@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text;
 using System.Text.Encodings.Web;
 using APIx.Models;
 using APIx.Repositories;
@@ -12,15 +11,14 @@ public class BearerAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
-    ISystemClock clock,
-    AuthRepository authRepository) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder, clock)
+    AuthRepository authRepository) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     private readonly AuthRepository _authRepository = authRepository;
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!Request.Headers.ContainsKey("Authorization"))
-        {
+        {            
             return AuthenticateResult.Fail("Unauthorized");
         }
         

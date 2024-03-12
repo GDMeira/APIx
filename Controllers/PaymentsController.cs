@@ -1,8 +1,5 @@
-using System.Net;
 using System.Security.Claims;
-using APIx.Exceptions;
 using APIx.RequestDTOs;
-using APIx.ResponseDTOs;
 using APIx.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +13,7 @@ public class PaymentsController(PaymentsService paymentsService) : ControllerBas
 {
     private readonly PaymentsService _paymentsService = paymentsService;
 
-    [HttpPost(Name = "/")]
+    [HttpPost]
     public IActionResult Post([FromBody] ReqPostPaymentsDTO postPaymentsDTO)
     {
         var claim = HttpContext.User.Claims

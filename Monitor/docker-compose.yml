@@ -60,6 +60,19 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
 
+  migrate:
+    image: dotnetapi-migrate
+    container_name: migrate
+    build:
+      context: ../.
+      dockerfile: Dockerfile.migrations
+    environment:
+      - DATABASE__HOST=postgres
+      - DATABASE__PORT=5432
+      - DATABASE__USERNAME=postgres
+      - DATABASE__PASSWORD=postgres
+      - DATABASE__NAME=mywallet-aula
+
   rabbitmq:
     image: rabbitmq:3.12.12-management
     container_name: rabbitmq
