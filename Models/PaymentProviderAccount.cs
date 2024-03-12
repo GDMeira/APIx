@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace APIx.Models;
 
 public class PaymentProviderAccount(string number, string agency)
@@ -21,4 +18,6 @@ public class PaymentProviderAccount(string number, string agency)
     public PaymentProvider PaymentProvider { get; set; } = null!;
 
     public ICollection<PixKey> PixKeys { get; set; } = null!;
+
+    public ICollection<Payment> Payments { get; set; } = null!;
 }
