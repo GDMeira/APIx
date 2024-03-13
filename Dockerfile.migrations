@@ -1,12 +1,10 @@
 # Use the official .NET Core SDK image to build the app
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
-WORKDIR /app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /source
 
 # Copy the CSPROJ file and restore any dependencies (via NuGet)
-COPY *.csproj ./
+COPY . .
 RUN dotnet restore
-
-COPY . ./
 
 # Install ef to run migrations
 RUN dotnet tool install --global dotnet-ef

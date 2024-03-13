@@ -66,12 +66,14 @@ builder.Services.AddSwaggerGen(opt =>
 builder.Services.AddScoped<KeysService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PaymentsService>();
+builder.Services.AddScoped<MessageService>();
 
 // Repositories
 builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<UsersRepository>();
 builder.Services.AddScoped<KeysRepository>();
 builder.Services.AddScoped<AccountsRepository>();
+builder.Services.AddScoped<PaymentsRepository>();
 
 // configs
 IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
