@@ -29,7 +29,6 @@ public partial class PaymentsService(UsersRepository usersRepository,
         payment.PixKeyId = pixKeyDB.Id;
         payment.PaymentProviderAccountId = accountDB.Id;
         Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
-        // mandar a requisição pra fila
         _messageService.SendMessage(paymentDB);
         
         return new ResPostPaymentsDTO(paymentDB);

@@ -11,6 +11,7 @@ public class ReqPostPaymentsDTO
     public required DestinyDTO Destiny { get; set; }
 
     [Required]
+    [Range(1, int.MaxValue)]
     public required int Amount { get; set; }
 
     public string? Description { get; set; }

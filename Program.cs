@@ -28,10 +28,6 @@ builder.Services.AddDbContext<AppDBContext>(opts =>
 
 builder.Services.AddControllers();
 
-// Authentication
-builder.Services.AddAuthentication("BearerAuthentication")
-    .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
-
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt => 
@@ -78,6 +74,10 @@ builder.Services.AddScoped<PaymentsRepository>();
 // configs
 IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
 builder.Services.Configure<QueueConfig>(queueConfig);
+
+// Authentication
+builder.Services.AddAuthentication("BearerAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
 
 var app = builder.Build();
 
