@@ -1,6 +1,7 @@
 using System.Text.Json;
 using APIx.Config;
 using APIx.Models;
+using APIx.ResponseDTOs;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
@@ -9,7 +10,7 @@ namespace APIx.Services;
 public class MessageService(IOptions<QueueConfig> queueConfig)
 {
     private readonly QueueConfig _queueConfig = queueConfig.Value;
-    public void SendMessage(Payment payment)
+    public void SendMessage(ResPostPaymentsDTO payment)
     {
         ConnectionFactory factory = new()
         {

@@ -11,6 +11,8 @@ public class ResPostPaymentsDTO(Payment payment)
 
     public string? Description { get; set; } = payment.Description;
 
+    public string Status { get; set; } = payment.Status;
+
     public class OriginDTO(PaymentProviderAccount account)
     {
         public AccountDTO Account { get; set; } = new AccountDTO(account.Number, account.Agency);

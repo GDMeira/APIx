@@ -29,9 +29,10 @@ public partial class PaymentsService(UsersRepository usersRepository,
         payment.PixKeyId = pixKeyDB.Id;
         payment.PaymentProviderAccountId = accountDB.Id;
         Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
-        _messageService.SendMessage(paymentDB);
+        ResPostPaymentsDTO response = new(paymentDB);
+        _messageService.SendMessage(response);
         
-        return new ResPostPaymentsDTO(paymentDB);
+        return response;
     }
 
     public async Task<User> ValidateUser(string userCpf)
