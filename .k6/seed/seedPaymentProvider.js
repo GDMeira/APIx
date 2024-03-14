@@ -43,6 +43,8 @@ function generatePaymentProviders() {
     providers.push({
       Name: faker.lorem.word(),
       Token: uuidv4(),
+      PatchPaymentUrl: "/payments/pix",
+      PostPaymentUrl: "/payments/pix"
     });
   }
 

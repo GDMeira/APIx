@@ -63,7 +63,7 @@ services:
       - migrate
 
   migrate:
-    image: dotnetapi-migration
+    image: dotnetapi-migration:latest
     build: 
       context: ../.
       dockerfile: Dockerfile.migrations

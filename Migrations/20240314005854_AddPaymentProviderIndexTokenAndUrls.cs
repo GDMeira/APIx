@@ -44,12 +44,6 @@ namespace APIx.Migrations
                 oldType: "timestamp with time zone");
 
             migrationBuilder.CreateIndex(
-                name: "AK_PixKey_Value",
-                table: "PixKey",
-                column: "Value",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PaymentProviderAccount_Token",
                 table: "PaymentProvider",
                 column: "Token",
@@ -59,10 +53,6 @@ namespace APIx.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "AK_PixKey_Value",
-                table: "PixKey");
-
             migrationBuilder.DropIndex(
                 name: "IX_PaymentProviderAccount_Token",
                 table: "PaymentProvider");
