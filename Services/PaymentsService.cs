@@ -19,23 +19,26 @@ public partial class PaymentsService(UsersRepository usersRepository,
     private readonly PaymentsRepository _paymentsRepository = paymentsRepository;
     public async Task<ResPostPaymentsDTO> PostPayment(ReqPostPaymentsDTO postPaymentsDTO, int paymentProviderId)
     {
-        // conta de distino não pode ser a mesma de origem
         // transação não pode se repetir nos últimos 30 segundos (chave de idempotencia)
-        // A PSP que está fazendo request tem que ser a mesma que está na conta de origem
         string userCpf = postPaymentsDTO.GetOriginUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postPaymentsDTO.GetDestinyPixKey();
         PixKey pixKeyDB = await ValidateKeyToRetrieval(pixKey.Type, pixKey.Value);
         PaymentProviderAccount paymentProviderAccountOrigin = postPaymentsDTO.GetOriginPaymentProviderAccount();
+        if (paymentProviderAccountOrigin.Number == pixKeyDB.PaymentProviderAccount.Number &&
+            paymentProviderAccountOrigin.Agency == pixKeyDB.PaymentProviderAccount.Agency)
+        {
+            throw new AppException(HttpStatusCode.BadRequest, "Origin and destiny account cannot be the same");
+        }
+
         PaymentProviderAccount accountDB = await RetrieveOrCreateAccount(paymentProviderAccountOrigin, paymentProviderId, user.Id);
         Payment payment = postPaymentsDTO.GetPayment();
         payment.PixKeyId = pixKeyDB.Id;
         payment.PaymentProviderAccountId = accountDB.Id;
         Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
-        ResPostPaymentsDTO response = new(paymentDB);
-        _messageService.SendMessage(response);
+        _messageService.SendMessage(paymentDB.Id);
         
-        return response;
+        return new ResPostPaymentsDTO(paymentDB);;
     }
 
     public async Task<User> ValidateUser(string userCpf)

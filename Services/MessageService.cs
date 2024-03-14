@@ -1,7 +1,5 @@
 using System.Text.Json;
 using APIx.Config;
-using APIx.Models;
-using APIx.ResponseDTOs;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
@@ -10,7 +8,7 @@ namespace APIx.Services;
 public class MessageService(IOptions<QueueConfig> queueConfig)
 {
     private readonly QueueConfig _queueConfig = queueConfig.Value;
-    public void SendMessage(ResPostPaymentsDTO payment)
+    public void SendMessage(int paymentId)
     {
         ConnectionFactory factory = new()
         {
@@ -28,7 +26,7 @@ public class MessageService(IOptions<QueueConfig> queueConfig)
             arguments: null
         );
 
-        var body = JsonSerializer.SerializeToUtf8Bytes(payment);
+        var body = JsonSerializer.SerializeToUtf8Bytes(paymentId);
         var properties = channel.CreateBasicProperties();
         properties.Headers = new Dictionary<string, object>()
         {
