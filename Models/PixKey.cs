@@ -1,5 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace APIx.Models;
 
+[Index("Value", Name = "AK_PixKey_Value", IsUnique = true)]
 public class PixKey(string type, string value)
 {
     public int Id { get; set; }

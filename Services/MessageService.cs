@@ -29,6 +29,11 @@ public class MessageService(IOptions<QueueConfig> queueConfig)
         );
 
         var body = JsonSerializer.SerializeToUtf8Bytes(payment);
+        var properties = channel.CreateBasicProperties();
+        properties.Headers = new Dictionary<string, object>()
+        {
+            { "retry-count", 0 }
+        };
 
         channel.BasicPublish(
             exchange: "",

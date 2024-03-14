@@ -19,6 +19,9 @@ public partial class PaymentsService(UsersRepository usersRepository,
     private readonly PaymentsRepository _paymentsRepository = paymentsRepository;
     public async Task<ResPostPaymentsDTO> PostPayment(ReqPostPaymentsDTO postPaymentsDTO, int paymentProviderId)
     {
+        // conta de distino não pode ser a mesma de origem
+        // transação não pode se repetir nos últimos 30 segundos (chave de idempotencia)
+        // A PSP que está fazendo request tem que ser a mesma que está na conta de origem
         string userCpf = postPaymentsDTO.GetOriginUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postPaymentsDTO.GetDestinyPixKey();
