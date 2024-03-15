@@ -19,7 +19,6 @@ public partial class PaymentsService(UsersRepository usersRepository,
     private readonly PaymentsRepository _paymentsRepository = paymentsRepository;
     public async Task<ResPostPaymentsDTO> PostPayment(ReqPostPaymentsDTO postPaymentsDTO, int paymentProviderId)
     {
-        // transação não pode se repetir nos últimos 30 segundos (chave de idempotencia baseada no valor, pixKey e account)
         string userCpf = postPaymentsDTO.GetOriginUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postPaymentsDTO.GetDestinyPixKey();
@@ -35,6 +34,7 @@ public partial class PaymentsService(UsersRepository usersRepository,
         Payment payment = postPaymentsDTO.GetPayment();
         payment.PixKeyId = pixKeyDB.Id;
         payment.PaymentProviderAccountId = accountDB.Id;
+        await CheckIdempotence(payment);
         Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
         _messageService.SendMessage(paymentDB.Id);
         
@@ -112,4 +112,14 @@ public partial class PaymentsService(UsersRepository usersRepository,
         return await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??
             throw new AppException(HttpStatusCode.NotFound, "Key not found");
     }    
+
+    public async Task CheckIdempotence(Payment payment)
+    {
+        Payment? paymentFromDb = await _paymentsRepository.RetrievePaymentByValueAndPixKeyAndAccount(payment);
+
+        if (paymentFromDb != null)
+        {
+            throw new AppException(HttpStatusCode.BadRequest, "Payment already exists");
+        }
+    }
 }
