@@ -1,6 +1,5 @@
 using APIx.Data;
 using APIx.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace APIx.Repositories;
 

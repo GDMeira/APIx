@@ -12,7 +12,10 @@ public class MessageService(IOptions<QueueConfig> queueConfig)
     {
         ConnectionFactory factory = new()
         {
-            HostName = _queueConfig.HostName
+            HostName = _queueConfig.HostName,
+            UserName = _queueConfig.UserName,
+            Password = _queueConfig.Password,
+            VirtualHost = _queueConfig.VirtualHost
         };
 
         IConnection connection = factory.CreateConnection();
@@ -20,7 +23,7 @@ public class MessageService(IOptions<QueueConfig> queueConfig)
 
         channel.QueueDeclare(
             queue: _queueConfig.Queue,
-            durable: false,
+            durable: true,
             exclusive: false,
             autoDelete: false,
             arguments: null
@@ -32,11 +35,12 @@ public class MessageService(IOptions<QueueConfig> queueConfig)
         {
             { "retry-count", 0 }
         };
+        properties.Persistent = true;
 
         channel.BasicPublish(
             exchange: "",
             routingKey: _queueConfig.Queue,
-            basicProperties: null,
+            basicProperties: properties,
             body: body
         );
     }

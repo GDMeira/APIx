@@ -61,6 +61,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - migrate
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5045/health"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
 
   migrate:
     image: dotnetapi-migration:latest
@@ -74,11 +80,18 @@ services:
   rabbitmq:
     image: rabbitmq:3.12.12-management
     container_name: rabbitmq
+    hostname: rabbitmq
     ports:
       - 5672:5672
       - 15672:15672
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
   
   psp-mock:
     image: psp-mock:latest

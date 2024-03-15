@@ -19,7 +19,7 @@ public partial class PaymentsService(UsersRepository usersRepository,
     private readonly PaymentsRepository _paymentsRepository = paymentsRepository;
     public async Task<ResPostPaymentsDTO> PostPayment(ReqPostPaymentsDTO postPaymentsDTO, int paymentProviderId)
     {
-        // transação não pode se repetir nos últimos 30 segundos (chave de idempotencia)
+        // transação não pode se repetir nos últimos 30 segundos (chave de idempotencia baseada no valor, pixKey e account)
         string userCpf = postPaymentsDTO.GetOriginUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postPaymentsDTO.GetDestinyPixKey();
