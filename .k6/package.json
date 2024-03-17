@@ -1,8 +1,11 @@
 {
   "description": "",
+  "type": "module",
   "scripts": {
     "seed": "node ./seed/seedUser.js && node ./seed/seedPaymentProvider.js",
-    "test:post-keys": "k6 run ./tests/postKeysTest.js"
+    "seed:pix-key": "node ./seed/seedPixKey.js",
+    "test:post-keys": "k6 run ./tests/postKeysTest.js",
+    "test:post-payments": "k6 run ./tests/postPaymentsTest.js"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",

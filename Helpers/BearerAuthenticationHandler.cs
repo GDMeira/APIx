@@ -1,5 +1,7 @@
+using System.Net;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using APIx.Exceptions;
 using APIx.Models;
 using APIx.Repositories;
 using Microsoft.AspNetCore.Authentication;
@@ -19,32 +21,32 @@ public class BearerAuthenticationHandler(
     {
         if (!Request.Headers.ContainsKey("Authorization"))
         {            
-            return AuthenticateResult.Fail("Unauthorized");
+            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
         }
         
         string? authorizationHeader = Request.Headers.Authorization;
         if (string.IsNullOrEmpty(authorizationHeader))
         {
-            return AuthenticateResult.Fail("Unauthorized");
+            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
         }
         
         if (!authorizationHeader.StartsWith("bearer ", StringComparison.OrdinalIgnoreCase))
         {
-            return AuthenticateResult.Fail("Unauthorized");
+            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
         }
         
         string token = authorizationHeader.Split(" ")[1]; //Bearer token
 
         if (string.IsNullOrEmpty(token))
         {
-            return AuthenticateResult.Fail("Unauthorized");
+            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
         }
 
         PaymentProvider? paymentProvider = await _authRepository.RetrievePaymentProviderByToken(token);
         
         if (paymentProvider == null)
         {
-            return AuthenticateResult.Fail("Unauthorized");
+            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
         }
         
         var claims = new[]
