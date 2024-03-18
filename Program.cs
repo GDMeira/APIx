@@ -2,6 +2,7 @@ using APIx.Config;
 using APIx.Data;
 using APIx.Helpers;
 using APIx.Middlewares;
+using APIx.OCMinimal;
 using APIx.Repositories;
 using APIx.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -30,7 +31,7 @@ builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(opt => 
+builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new() { Title = "APIx", Version = "v1" });
     opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -71,9 +72,32 @@ builder.Services.AddScoped<KeysRepository>();
 builder.Services.AddScoped<AccountsRepository>();
 builder.Services.AddScoped<PaymentsRepository>();
 
-// configs
+// Rabbimq Queue
 IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
 builder.Services.Configure<QueueConfig>(queueConfig);
+
+// Cache
+builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        string host = builder.Configuration["Cache:Host"] ?? string.Empty;
+        string port = builder.Configuration["Cache:Port"] ?? string.Empty;
+        string instance = builder.Configuration["Cache:Instance"] ?? string.Empty;
+        options.Configuration = $"{host}:{port}";
+        options.InstanceName = instance;
+    });
+builder.Services.AddOutputCache(opt => 
+{
+    opt.AddPolicy("CacheAuthenticated", MyCustomPolicy.Instance);
+});
+builder.Services.AddStackExchangeRedisOutputCache(opt =>
+    {
+        string host = builder.Configuration["Cache:Host"] ?? string.Empty;
+        string port = builder.Configuration["Cache:Port"] ?? string.Empty;
+        string instance = builder.Configuration["Cache:Instance"] ?? string.Empty;
+        opt.Configuration = $"{host}:{port}";
+        opt.InstanceName = instance;
+    });
+
 
 // Authentication
 builder.Services.AddAuthentication("BearerAuthentication")
@@ -103,5 +127,8 @@ app.MapMetrics();
 
 // Middlewares
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Cache
+app.UseOutputCache();
 
 app.Run();

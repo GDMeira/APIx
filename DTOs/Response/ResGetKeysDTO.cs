@@ -8,4 +8,6 @@ public class ResGetKeysDTO(PixKey pixKey, User user,
     public FullUserDTO User { get; set; } = new FullUserDTO(user.Name, user.Cpf);
     public FullAccountDTO Account { get; set; } = new FullAccountDTO(paymentProviderAccount.Number,
         paymentProviderAccount.Agency, paymentProvider.Name, paymentProvider.Id.ToString());
+    
+    public DateTime Now { get; set; } = DateTime.Now;
 }

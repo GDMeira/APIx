@@ -6,6 +6,7 @@ using APIx.ResponseDTOs;
 using APIx.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace APIx.Controllers;
 
@@ -29,6 +30,7 @@ public class KeysController(KeysService keysService) : ControllerBase
     }
 
     [HttpGet("/{type}/{value}")]
+    [OutputCache(PolicyName = "CacheAuthenticated")]
     public async Task<IActionResult> Get([FromRoute] string? type, [FromRoute] string? value)
     {
         if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(value))
