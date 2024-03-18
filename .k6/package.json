@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "seed": "node ./seed/seedUser.js && node ./seed/seedPaymentProvider.js",
-    "seed:pix-key": "node ./seed/seedPixKey.js",
+    "seed:pix-key": "npm run seed && node ./seed/seedPixKey.js",
     "test:post-keys": "k6 run ./tests/postKeysTest.js",
     "test:post-payments": "k6 run ./tests/postPaymentsTest.js"
   },
