@@ -79,7 +79,7 @@ public partial class KeysService(UsersRepository usersRepository,
             throw new AppException(HttpStatusCode.BadRequest, "User already has 5 keys with this payment provider");
         }
 
-        if (pixKeysFromSameProvider.FirstOrDefault(p => p.Value == pixKey.Value) != null)
+        if (pixKeysFromSameProvider.Where(p => p.Value == pixKey.Value).ToArray().Length > 0)
         {
             throw new AppException(HttpStatusCode.Conflict, "User already has this key");
         }
@@ -160,8 +160,9 @@ public partial class KeysService(UsersRepository usersRepository,
         {
             return await _keysRepository.CreateKey(pixKey, account);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine(e);
             throw new AppException(HttpStatusCode.Conflict, $"This key {pixKey.Value} already exists");
         }
     }
@@ -177,7 +178,7 @@ public partial class KeysService(UsersRepository usersRepository,
     [GeneratedRegex(@"^[0-9]{11}$")]
     private static partial Regex CpfRegex();
 
-    public async Task<ResGetKeysDTO> GetKeys(string type, string value, string? authorization)
+    public async Task<ResGetKeysDTO> GetKeys(string type, string value)
     {
         ValidateKeyToRetrieval(type, value);
         PixKey pixKey = await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??

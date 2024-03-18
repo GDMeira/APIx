@@ -13,6 +13,8 @@ public class AppDBContext(DbContextOptions<AppDBContext> options) : DbContext(op
 
 	public DbSet<PixKey> PixKey { get; set; } = null!;
 
+	public DbSet<Payment> Payment { get; set; } = null!;
+
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -21,35 +23,44 @@ public class AppDBContext(DbContextOptions<AppDBContext> options) : DbContext(op
 			.HasDefaultValueSql("NOW()");
 
 		modelBuilder.Entity<PaymentProvider>()
-            .Property(p => p.UpdatedAt)
-            .HasDefaultValueSql("NOW()")
-            .ValueGeneratedOnUpdate();
+			.Property(p => p.UpdatedAt)
+			.HasDefaultValueSql("NOW()")
+			.ValueGeneratedOnUpdate();
 
 		modelBuilder.Entity<PaymentProviderAccount>()
 			.Property(p => p.CreatedAt)
 			.HasDefaultValueSql("NOW()");
 
 		modelBuilder.Entity<PaymentProviderAccount>()
-            .Property(p => p.UpdatedAt)
-            .HasDefaultValueSql("NOW()")
-            .ValueGeneratedOnUpdate();
+			.Property(p => p.UpdatedAt)
+			.HasDefaultValueSql("NOW()")
+			.ValueGeneratedOnUpdate();
 
 		modelBuilder.Entity<PixKey>()
 			.Property(p => p.CreatedAt)
 			.HasDefaultValueSql("NOW()");
 
 		modelBuilder.Entity<PixKey>()
-            .Property(p => p.UpdatedAt)
-            .HasDefaultValueSql("NOW()")
-            .ValueGeneratedOnUpdate();
+			.Property(p => p.UpdatedAt)
+			.HasDefaultValueSql("NOW()")
+			.ValueGeneratedOnUpdate();
 
 		modelBuilder.Entity<User>()
 			.Property(p => p.CreatedAt)
 			.HasDefaultValueSql("NOW()");
 
 		modelBuilder.Entity<User>()
-            .Property(p => p.UpdatedAt)
-            .HasDefaultValueSql("NOW()")
-            .ValueGeneratedOnUpdate();
+			.Property(p => p.UpdatedAt)
+			.HasDefaultValueSql("NOW()")
+			.ValueGeneratedOnUpdate();
+
+		modelBuilder.Entity<Payment>()
+			.Property(p => p.CreatedAt)
+			.HasDefaultValueSql("NOW()");
+
+		modelBuilder.Entity<Payment>()
+			.Property(p => p.UpdatedAt)
+			.HasDefaultValueSql("NOW()")
+			.ValueGeneratedOnUpdate();
 	}
 }

@@ -3,6 +3,7 @@ using System;
 using APIx.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIx.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240312210950_AddPayments")]
+    partial class AddPayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,9 +37,7 @@ namespace APIx.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("NOW()");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -52,9 +53,7 @@ namespace APIx.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnUpdate()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("NOW()");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -82,14 +81,6 @@ namespace APIx.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("PatchPaymentUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PostPaymentUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasColumnType("text");
@@ -100,9 +91,6 @@ namespace APIx.Migrations
                         .HasDefaultValueSql("NOW()");
 
                     b.HasKey("Id");
-
-                    b.HasIndex(new[] { "Token" }, "IX_PaymentProviderAccount_Token")
-                        .IsUnique();
 
                     b.ToTable("PaymentProvider");
                 });
@@ -180,9 +168,6 @@ namespace APIx.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PaymentProviderAccountId");
-
-                    b.HasIndex(new[] { "Value" }, "AK_PixKey_Value")
-                        .IsUnique();
 
                     b.ToTable("PixKey");
                 });

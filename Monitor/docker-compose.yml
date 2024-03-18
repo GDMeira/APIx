@@ -1,16 +1,5 @@
 version: '3.8'
 services:
-  node-exporter:
-    image: quay.io/prometheus/node-exporter:latest
-    command:
-      - '--path.rootfs=/host'
-    pid: host
-    ports:
-      - 9100:9100
-    restart: unless-stopped
-    volumes:
-      - '/:/host:ro,rslave'
-
   prometheus:
     container_name: prometheus
     image: prom/prometheus:latest
@@ -51,12 +40,55 @@ services:
 
   apix:
     image: dotnetapi:latest
+    build: 
+      context: ../.
+      dockerfile: Dockerfile
     container_name: apix
     ports:
       - 5045:5045
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
+    depends_on:
+      - migrate
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5045/health"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  migrate:
+    image: dotnetapi-migration:latest
+    build: 
+      context: ../.
+      dockerfile: Dockerfile.migrations
+    container_name: migrate
+    depends_on:
+      - postgres
+
+  rabbitmq:
+    image: rabbitmq:3.12.12-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+  
+  psp-mock:
+    image: psp-mock:latest
+    container_name: psp-mock
+    ports:
+      - 5039:5039
     
 volumes:
   grafana:
   postgres_data:
+  rabbitmq_data:
