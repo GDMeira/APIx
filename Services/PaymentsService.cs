@@ -109,7 +109,7 @@ public partial class PaymentsService(UsersRepository usersRepository,
             throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid random key");
         }
 
-        return await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??
+        return await _keysRepository.RetrieveKeyByValue(value) ??
             throw new AppException(HttpStatusCode.NotFound, "Key not found");
     }    
 

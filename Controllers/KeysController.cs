@@ -29,7 +29,7 @@ public class KeysController(KeysService keysService) : ControllerBase
         return CreatedAtAction(nameof(Post), response);
     }
 
-    [HttpGet("/{type}/{value}")]
+    [HttpGet("/[controller]/{type}/{value}")]
     [OutputCache(PolicyName = "CacheAuthenticated")]
     public async Task<IActionResult> Get([FromRoute] string? type, [FromRoute] string? value)
     {

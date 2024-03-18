@@ -85,6 +85,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
         options.Configuration = $"{host}:{port}";
         options.InstanceName = instance;
     });
+    
 builder.Services.AddOutputCache(opt => 
 {
     opt.AddPolicy("CacheAuthenticated", MyCustomPolicy.Instance);
