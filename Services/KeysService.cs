@@ -9,10 +9,9 @@ using APIx.Repositories;
 
 namespace APIx.Services;
 
-public partial class KeysService(AuthRepository authRepository, UsersRepository usersRepository,
+public partial class KeysService(UsersRepository usersRepository,
     KeysRepository keysRepository, AccountsRepository accountsRepository)
 {
-    private readonly AuthRepository _authRepository = authRepository;
     private readonly UsersRepository _usersRepository = usersRepository;
     private readonly KeysRepository _keysRepository = keysRepository;
     private readonly AccountsRepository _accountsRepository = accountsRepository;
@@ -21,24 +20,36 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
         string userCpf = postKeysDTO.GetUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postKeysDTO.GetPixKey();
-        await ValidateKeyToCreation(pixKey, user, paymentProviderId);
-        PaymentProviderAccount paymentProviderAccount = await RetrieveOrCreateAccount(postKeysDTO.GetPaymentProviderAccount(),
-            paymentProviderId, user.Id);
-        pixKey.PaymentProviderAccountId = paymentProviderAccount.Id;
-        PixKey newPixKey = await CreateKey(pixKey);
-        var response = new ResPostKeysDTO(newPixKey, user, paymentProviderAccount);
+        PixKey[] userPixKeys = await ValidateKeyToCreation(pixKey, user, paymentProviderId);
+        PaymentProviderAccount receivedAccount = postKeysDTO.GetPaymentProviderAccount();
+        PaymentProviderAccount? paymentProviderAccountDB = await RetrieveAccount(receivedAccount,
+            paymentProviderId, user.Id, userPixKeys);
+        PixKey newPixKey;
+
+        if (paymentProviderAccountDB != null)
+        {
+            pixKey.PaymentProviderAccountId = paymentProviderAccountDB.Id;
+            newPixKey = await CreateKey(pixKey);
+        }
+        else
+        {
+            receivedAccount.UserId = user.Id;
+            receivedAccount.PaymentProviderId = paymentProviderId;
+            newPixKey = await CreateKey(pixKey, receivedAccount);
+        }
+
+        var response = new ResPostKeysDTO(newPixKey, user, newPixKey.PaymentProviderAccount);
 
         return response;
     }
 
     public async Task<User> ValidateUser(string userCpf)
     {
-        System.Console.WriteLine(userCpf);
         return await _usersRepository.RetrieveUserByCpf(userCpf) ??
             throw new AppException(HttpStatusCode.NotFound, "User not found");
     }
 
-    public async Task ValidateKeyToCreation(PixKey pixKey, User user, int paymentProviderId)
+    public async Task<PixKey[]> ValidateKeyToCreation(PixKey pixKey, User user, int paymentProviderId)
     {
         if (pixKey.Type == "CPF" && pixKey.Value != user.Cpf)
         {
@@ -54,46 +65,56 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
         }
 
         PixKey[] pixKeys = await _keysRepository.RetrieveKeysByUserId(user.Id);
-        
+
         if (pixKeys.Length >= 20)
         {
             throw new AppException(HttpStatusCode.BadRequest, "User already has 20 keys");
         }
 
-        PixKey[] pixKeysFromSameProvider = pixKeys.Where(p => 
+        PixKey[] pixKeysFromSameProvider = pixKeys.Where(p =>
             p.PaymentProviderAccount.PaymentProviderId == paymentProviderId).ToArray();
 
         if (pixKeysFromSameProvider.Length >= 5)
         {
             throw new AppException(HttpStatusCode.BadRequest, "User already has 5 keys with this payment provider");
         }
+
+        if (pixKeysFromSameProvider.Where(p => p.Value == pixKey.Value).ToArray().Length > 0)
+        {
+            throw new AppException(HttpStatusCode.Conflict, "User already has this key");
+        }
+
+        return pixKeys;
     }
 
-    public async Task<PaymentProviderAccount> RetrieveOrCreateAccount(PaymentProviderAccount paymentProviderAccount,
-        int paymentProviderId, int userId)
+    public async Task<PaymentProviderAccount?> RetrieveAccount(PaymentProviderAccount paymentProviderAccount,
+        int paymentProviderId, int userId, PixKey[] userPixKeys)
     {
-        PaymentProviderAccount? paymentProviderAccountFromDb = await _accountsRepository
+        PixKey? pixFromSameAccount = userPixKeys.FirstOrDefault(p =>
+            p.PaymentProviderAccount.Number == paymentProviderAccount.Number &&
+            p.PaymentProviderAccount.Agency == paymentProviderAccount.Agency);
+
+        PaymentProviderAccount? paymentProviderAccountFromDb =
+            pixFromSameAccount?.PaymentProviderAccount ?? await _accountsRepository
             .RetrieveAccount(paymentProviderAccount.Number, paymentProviderAccount.Agency);
 
         if (paymentProviderAccountFromDb == null)
         {
-            paymentProviderAccount.PaymentProviderId = paymentProviderId;
-            paymentProviderAccount.UserId = userId;
-            paymentProviderAccountFromDb = await _accountsRepository
-                                                    .CreateAccount(paymentProviderAccount);
-        } 
-        
+            return paymentProviderAccountFromDb;
+        }
+
         if (paymentProviderAccountFromDb.PaymentProviderId != paymentProviderId)
         {
             throw new AppException(HttpStatusCode.BadRequest, "Account already exists with another payment provider");
-        } else if (paymentProviderAccountFromDb.UserId != userId)
+        }
+        else if (paymentProviderAccountFromDb.UserId != userId)
         {
             throw new AppException(HttpStatusCode.BadRequest, "Account already exists with another user");
         }
 
         return paymentProviderAccountFromDb;
     }
-    
+
     public async Task<PixKey> CreateKey(PixKey pixKey)
     {
         if (pixKey.Type == "Random")
@@ -119,6 +140,32 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
             throw new AppException(HttpStatusCode.Conflict, $"This key {pixKey.Value} already exists");
         }
     }
+
+    public async Task<PixKey> CreateKey(PixKey pixKey, PaymentProviderAccount account)
+    {
+        if (pixKey.Type == "Random")
+        {
+            try
+            {
+                pixKey.Value = RandomKeyGenerator.GenerateRandomKey();
+                return await _keysRepository.CreateKey(pixKey, account);
+            }
+            catch (Exception)
+            {
+                return await CreateKey(pixKey, account);
+            }
+        }
+
+        try
+        {
+            return await _keysRepository.CreateKey(pixKey, account);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw new AppException(HttpStatusCode.Conflict, $"This key {pixKey.Value} already exists");
+        }
+    }
     [GeneratedRegex(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")]
     private static partial Regex EmailRegex();
 
@@ -131,7 +178,7 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
     [GeneratedRegex(@"^[0-9]{11}$")]
     private static partial Regex CpfRegex();
 
-    public async Task<ResGetKeysDTO> GetKeys(string type, string value, string? authorization)
+    public async Task<ResGetKeysDTO> GetKeys(string type, string value)
     {
         ValidateKeyToRetrieval(type, value);
         PixKey pixKey = await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??
@@ -146,7 +193,7 @@ public partial class KeysService(AuthRepository authRepository, UsersRepository 
         if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
         {
             throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid type");
-        }        
+        }
         else if (type == "CPF" && !CpfRegex().IsMatch(value))
         {
             throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid CPF");

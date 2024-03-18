@@ -1,10 +1,10 @@
-const dotenv = require("dotenv");
-const fs = require("fs");
-// const { faker } = require("@faker-js/faker");
+import fs from "fs";
+import dotenv from "dotenv";
+import knex from "knex";
 
 dotenv.config();
 
-const knex = require("knex")({
+const knexx = new knex({
   client: "pg",
   connection: process.env.DATABASE_URL,
 });
@@ -14,7 +14,11 @@ const ERASE_DATA = true;
 
 async function run() {
   if (ERASE_DATA) {
-    await knex("User").del();
+    await knexx("PixKey").del();
+    await knexx("PaymentProviderAccount").del();
+    await knexx("Payment").del();
+    await knexx("User").del();
+    await knexx("PaymentProvider").del();
   }
 
   const start = new Date();
@@ -25,7 +29,7 @@ async function run() {
   generateJson("./seed/existing_users.json", users);
 
   console.log("Closing DB connection...");
-  await knex.destroy();
+  await knexx.destroy();
 
   const end = new Date();
 
@@ -52,7 +56,7 @@ async function populateUsers(users) {
   console.log("Storing on DB...");
 
   const tableName = "User";
-  await knex.batchInsert(tableName, users);
+  await knexx.batchInsert(tableName, users);
 }
 
 function generateJson(filepath, data) {

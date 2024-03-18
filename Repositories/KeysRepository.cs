@@ -16,11 +16,22 @@ public class KeysRepository(AppDBContext appDBContext)
     }
     public async Task<PixKey> CreateKey(PixKey pixKey)
     {
-        var entry = _appDBContext.PixKey.Add(pixKey);
+        var entry = await _appDBContext.PixKey.AddAsync(pixKey);
         await _appDBContext.SaveChangesAsync();
         
         return entry.Entity;
     }
+
+    public async Task<PixKey> CreateKey(PixKey pixKey, PaymentProviderAccount account)
+    {
+        account.PixKeys = [pixKey];
+        var entry = await _appDBContext.PaymentProviderAccount
+            .AddAsync(account);
+        await _appDBContext.SaveChangesAsync();
+        
+        return entry.Entity.PixKeys.Last();
+    }
+    
 
     public async Task<PixKey?> RetrieveKeyByTypeAndValue(string type, string value)
     {

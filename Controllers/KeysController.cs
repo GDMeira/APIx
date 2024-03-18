@@ -16,7 +16,7 @@ public class KeysController(KeysService keysService) : ControllerBase
 {
     private readonly KeysService _keysService = keysService;
 
-    [HttpPost(Name = "/")]
+    [HttpPost]
     public async Task<IActionResult> Post([FromBody] ReqPostKeysDTO postKeysDTO)
     {
         var claim = HttpContext.User.Claims
@@ -29,15 +29,14 @@ public class KeysController(KeysService keysService) : ControllerBase
     }
 
     [HttpGet("/{type}/{value}")]
-    public async Task<IActionResult> Get([FromRoute] string? type, [FromRoute] string? value,
-                                        [FromHeader(Name = "Authorization")] string? authorization)
+    public async Task<IActionResult> Get([FromRoute] string? type, [FromRoute] string? value)
     {
         if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(value))
         {
             throw new AppException(HttpStatusCode.BadRequest, "Type and value are required");
         }
         
-        ResGetKeysDTO response = await _keysService.GetKeys(type, value, authorization);
+        ResGetKeysDTO response = await _keysService.GetKeys(type, value);
 
         return Ok(response);
     }

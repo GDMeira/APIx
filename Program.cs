@@ -1,3 +1,4 @@
+using APIx.Config;
 using APIx.Data;
 using APIx.Helpers;
 using APIx.Middlewares;
@@ -26,10 +27,6 @@ builder.Services.AddDbContext<AppDBContext>(opts =>
 });
 
 builder.Services.AddControllers();
-
-// Authentication
-builder.Services.AddAuthentication("BearerAuthentication")
-    .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -64,12 +61,23 @@ builder.Services.AddSwaggerGen(opt =>
 // Services
 builder.Services.AddScoped<KeysService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<PaymentsService>();
+builder.Services.AddScoped<MessageService>();
 
 // Repositories
 builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<UsersRepository>();
 builder.Services.AddScoped<KeysRepository>();
 builder.Services.AddScoped<AccountsRepository>();
+builder.Services.AddScoped<PaymentsRepository>();
+
+// configs
+IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
+builder.Services.Configure<QueueConfig>(queueConfig);
+
+// Authentication
+builder.Services.AddAuthentication("BearerAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
 
 var app = builder.Build();
 
@@ -86,6 +94,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

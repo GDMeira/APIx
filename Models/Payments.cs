@@ -1,20 +1,21 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace APIx.Models;
 
-[Index("Value", Name = "AK_PixKey_Value", IsUnique = true)]
-public class PixKey(string type, string value)
+public class Payment(int amount, string? description)
 {
     public int Id { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public string Type { get; set; } = type;
+    public int Amount { get; set; } = amount;
 
-    public string Value { get; set; } = value;
+    public string? Description { get; set; } = description;
+
+    public string Status { get; set; } = "PENDING";
 
     public int PaymentProviderAccountId { get; set; }
 
     public PaymentProviderAccount PaymentProviderAccount { get; set; } = null!;
 
-    public ICollection<Payment> Payments { get; set; } = null!;
+    public int PixKeyId { get; set; }
+
+    public PixKey PixKey { get; set; } = null!;
 }
