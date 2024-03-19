@@ -5,7 +5,8 @@
     "seed": "node ./seed/seedUser.js && node ./seed/seedPaymentProvider.js",
     "seed:pix-key": "npm run seed && node ./seed/seedPixKey.js",
     "test:post-keys": "k6 run ./tests/postKeysTest.js",
-    "test:post-payments": "k6 run ./tests/postPaymentsTest.js"
+    "test:post-payments": "k6 run ./tests/postPaymentsTest.js",
+    "test:get-keys": "k6 run ./tests/getKeysTest.js"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",

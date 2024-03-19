@@ -181,7 +181,7 @@ public partial class KeysService(UsersRepository usersRepository,
     public async Task<ResGetKeysDTO> GetKeys(string type, string value)
     {
         ValidateKeyToRetrieval(type, value);
-        PixKey pixKey = await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??
+        PixKey pixKey = await _keysRepository.RetrieveKeyByValue(value) ??
             throw new AppException(HttpStatusCode.NotFound, "Key not found");
 
         return new ResGetKeysDTO(pixKey, pixKey.PaymentProviderAccount.User,

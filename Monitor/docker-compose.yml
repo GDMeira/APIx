@@ -47,7 +47,7 @@ services:
     ports:
       - 5045:5045
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - migrate
     healthcheck:
@@ -87,8 +87,18 @@ services:
     container_name: psp-mock
     ports:
       - 5039:5039
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
     
 volumes:
   grafana:
   postgres_data:
   rabbitmq_data:
+  redis_data:

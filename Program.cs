@@ -30,7 +30,7 @@ builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(opt => 
+builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new() { Title = "APIx", Version = "v1" });
     opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -58,9 +58,24 @@ builder.Services.AddSwaggerGen(opt =>
     });
 });
 
+// Rabbimq Queue
+IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
+builder.Services.Configure<QueueConfig>(queueConfig);
+
+// Cache
+builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        string host = builder.Configuration["Cache:Host"] ?? string.Empty;
+        string port = builder.Configuration["Cache:Port"] ?? string.Empty;
+        options.Configuration = $"{host}:{port}";
+    });
+
+// Authentication
+builder.Services.AddAuthentication("BearerAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
+
 // Services
 builder.Services.AddScoped<KeysService>();
-builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PaymentsService>();
 builder.Services.AddScoped<MessageService>();
 
@@ -70,14 +85,7 @@ builder.Services.AddScoped<UsersRepository>();
 builder.Services.AddScoped<KeysRepository>();
 builder.Services.AddScoped<AccountsRepository>();
 builder.Services.AddScoped<PaymentsRepository>();
-
-// configs
-IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
-builder.Services.Configure<QueueConfig>(queueConfig);
-
-// Authentication
-builder.Services.AddAuthentication("BearerAuthentication")
-    .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
+builder.Services.AddScoped<CacheRepository>();
 
 var app = builder.Build();
 

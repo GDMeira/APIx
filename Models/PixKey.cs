@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace APIx.Models;
 
@@ -16,5 +17,6 @@ public class PixKey(string type, string value)
 
     public PaymentProviderAccount PaymentProviderAccount { get; set; } = null!;
 
+    [JsonIgnore]
     public ICollection<Payment> Payments { get; set; } = null!;
 }
