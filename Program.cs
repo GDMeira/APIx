@@ -2,7 +2,6 @@ using APIx.Config;
 using APIx.Data;
 using APIx.Helpers;
 using APIx.Middlewares;
-using APIx.OCMinimal;
 using APIx.Repositories;
 using APIx.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -59,19 +58,6 @@ builder.Services.AddSwaggerGen(opt =>
     });
 });
 
-// Services
-builder.Services.AddScoped<KeysService>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<PaymentsService>();
-builder.Services.AddScoped<MessageService>();
-
-// Repositories
-builder.Services.AddScoped<AuthRepository>();
-builder.Services.AddScoped<UsersRepository>();
-builder.Services.AddScoped<KeysRepository>();
-builder.Services.AddScoped<AccountsRepository>();
-builder.Services.AddScoped<PaymentsRepository>();
-
 // Rabbimq Queue
 IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
 builder.Services.Configure<QueueConfig>(queueConfig);
@@ -81,28 +67,25 @@ builder.Services.AddStackExchangeRedisCache(options =>
     {
         string host = builder.Configuration["Cache:Host"] ?? string.Empty;
         string port = builder.Configuration["Cache:Port"] ?? string.Empty;
-        string instance = builder.Configuration["Cache:Instance"] ?? string.Empty;
         options.Configuration = $"{host}:{port}";
-        options.InstanceName = instance;
     });
-    
-builder.Services.AddOutputCache(opt => 
-{
-    opt.AddPolicy("CacheAuthenticated", MyCustomPolicy.Instance);
-});
-builder.Services.AddStackExchangeRedisOutputCache(opt =>
-    {
-        string host = builder.Configuration["Cache:Host"] ?? string.Empty;
-        string port = builder.Configuration["Cache:Port"] ?? string.Empty;
-        string instance = builder.Configuration["Cache:Instance"] ?? string.Empty;
-        opt.Configuration = $"{host}:{port}";
-        opt.InstanceName = instance;
-    });
-
 
 // Authentication
 builder.Services.AddAuthentication("BearerAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("BearerAuthentication", null);
+
+// Services
+builder.Services.AddScoped<KeysService>();
+builder.Services.AddScoped<PaymentsService>();
+builder.Services.AddScoped<MessageService>();
+
+// Repositories
+builder.Services.AddScoped<AuthRepository>();
+builder.Services.AddScoped<UsersRepository>();
+builder.Services.AddScoped<KeysRepository>();
+builder.Services.AddScoped<AccountsRepository>();
+builder.Services.AddScoped<PaymentsRepository>();
+builder.Services.AddScoped<CacheRepository>();
 
 var app = builder.Build();
 
@@ -128,8 +111,5 @@ app.MapMetrics();
 
 // Middlewares
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-// Cache
-app.UseOutputCache();
 
 app.Run();

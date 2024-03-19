@@ -4,9 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APIx.Repositories;
 
-public class KeysRepository(AppDBContext appDBContext)
+public class KeysRepository(AppDBContext appDBContext, CacheRepository cache)
 {
     private readonly AppDBContext _appDBContext = appDBContext;
+    private readonly CacheRepository _cache = cache;
     public async Task<PixKey[]> RetrieveKeysByUserId(int userId)
     {
         return await _appDBContext.PixKey
@@ -35,9 +36,23 @@ public class KeysRepository(AppDBContext appDBContext)
 
     public async Task<PixKey?> RetrieveKeyByValue(string value)
     {
-        return await _appDBContext.PixKey
+        PixKey? cachedKey = await _cache.GetCachedData<PixKey>($"pixKey-{value}");
+        
+        if (cachedKey != null)
+        {
+            return cachedKey;
+        }
+
+        PixKey? keyDB = await _appDBContext.PixKey
             .Include(p => p.PaymentProviderAccount.User)
             .Include(p => p.PaymentProviderAccount.PaymentProvider)
             .FirstOrDefaultAsync(p => p.Value == value);
+
+        if (keyDB != null)
+        {
+            await _cache.SetCachedData($"pixKey-{value}", keyDB);
+        }
+
+        return keyDB;
     }
 }
