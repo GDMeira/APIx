@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace APIx.Models;
 
@@ -13,5 +14,6 @@ public class PaymentProvider(string token, string name)
     public string PostPaymentUrl { get; set; } = "/payments/pix";
     public string PatchPaymentUrl { get; set; } = "/payments/pix";
 
+    [JsonIgnore]
     public ICollection<PaymentProviderAccount> PaymentProviderAccounts { get; set; } = null!;
 }

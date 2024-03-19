@@ -38,24 +38,24 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # apix:
-  #   image: dotnetapi:latest
-  #   build: 
-  #     context: ../.
-  #     dockerfile: Dockerfile
-  #   container_name: apix
-  #   ports:
-  #     - 5045:5045
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #   depends_on:
-  #     - migrate
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:5045/health"]
-  #     interval: 1m30s
-  #     timeout: 30s
-  #     retries: 5
-  #     start_period: 30s
+  apix:
+    image: dotnetapi:latest
+    build: 
+      context: ../.
+      dockerfile: Dockerfile
+    container_name: apix
+    ports:
+      - 5045:5045
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - migrate
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5045/health"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
 
   migrate:
     image: dotnetapi-migration:latest

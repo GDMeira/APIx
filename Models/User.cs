@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace APIx.Models;
 
 public class User(string cpf, string name)
@@ -9,5 +11,6 @@ public class User(string cpf, string name)
 
     public string Name { get; set; } = name;
 
+    [JsonIgnore]
     public ICollection<PaymentProviderAccount> PaymentProviderAccounts { get; set; } = null!;
 }

@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace APIx.Models;
 
 public class PaymentProviderAccount(string number, string agency)
@@ -17,7 +19,9 @@ public class PaymentProviderAccount(string number, string agency)
 
     public PaymentProvider PaymentProvider { get; set; } = null!;
 
+    [JsonIgnore]
     public ICollection<PixKey> PixKeys { get; set; } = null!;
 
+    [JsonIgnore]
     public ICollection<Payment> Payments { get; set; } = null!;
 }
