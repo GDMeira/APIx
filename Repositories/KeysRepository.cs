@@ -44,6 +44,7 @@ public class KeysRepository(AppDBContext appDBContext, CacheRepository cache)
         }
 
         PixKey? keyDB = await _appDBContext.PixKey
+            .AsSplitQuery()
             .Include(p => p.PaymentProviderAccount.User)
             .Include(p => p.PaymentProviderAccount.PaymentProvider)
             .FirstOrDefaultAsync(p => p.Value == value);
