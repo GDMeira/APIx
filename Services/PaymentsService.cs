@@ -5,15 +5,16 @@ using APIx.Exceptions;
 using APIx.Models;
 using APIx.Repositories;
 using APIx.ResponseDTOs;
+using APIx.Helpers.RabbitMQ;
 
 namespace APIx.Services;
 
 public partial class PaymentsService(UsersRepository usersRepository,
-    MessageService messageService, AccountsRepository accountsRepository,
+    IRabbitManager messagePublisher, AccountsRepository accountsRepository,
     KeysRepository keysRepository, PaymentsRepository paymentsRepository)
 {
     private readonly UsersRepository _usersRepository = usersRepository;
-    private readonly MessageService _messageService = messageService;
+    private readonly IRabbitManager _messagePublisher = messagePublisher;
     private readonly AccountsRepository _accountsRepository = accountsRepository;
     private readonly KeysRepository _keysRepository = keysRepository;
     private readonly PaymentsRepository _paymentsRepository = paymentsRepository;
@@ -36,7 +37,8 @@ public partial class PaymentsService(UsersRepository usersRepository,
         payment.PaymentProviderAccountId = accountDB.Id;
         await CheckIdempotence(payment);
         Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
-        _messageService.SendMessage(paymentDB.Id);
+        string queue = "payments";
+        _messagePublisher.Publish(paymentDB.Id, queue);
         
         return new ResPostPaymentsDTO(paymentDB);;
     }
@@ -109,7 +111,7 @@ public partial class PaymentsService(UsersRepository usersRepository,
             throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid random key");
         }
 
-        return await _keysRepository.RetrieveKeyByTypeAndValue(type, value) ??
+        return await _keysRepository.RetrieveKeyByValue(value) ??
             throw new AppException(HttpStatusCode.NotFound, "Key not found");
     }    
 

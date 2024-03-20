@@ -28,7 +28,7 @@ public class KeysController(KeysService keysService) : ControllerBase
         return CreatedAtAction(nameof(Post), response);
     }
 
-    [HttpGet("/{type}/{value}")]
+    [HttpGet("/[controller]/{type}/{value}")]
     public async Task<IActionResult> Get([FromRoute] string? type, [FromRoute] string? value)
     {
         if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(value))
