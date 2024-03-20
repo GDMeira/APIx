@@ -1,13 +1,16 @@
 using APIx.Config;
 using APIx.Data;
 using APIx.Helpers;
+using APIx.Helpers.RabbitMQ;
 using APIx.Middlewares;
 using APIx.Repositories;
 using APIx.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.ObjectPool;
 using Microsoft.OpenApi.Models;
 using Prometheus;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,8 +62,11 @@ builder.Services.AddSwaggerGen(opt =>
 });
 
 // Rabbimq Queue
-IConfigurationSection queueConfig = builder.Configuration.GetSection("QueueSettings");
-builder.Services.Configure<QueueConfig>(queueConfig);
+IConfigurationSection RabbitOptions = builder.Configuration.GetSection("QueueSettings");
+builder.Services.Configure<RabbitOptions>(RabbitOptions);
+builder.Services.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+builder.Services.AddSingleton<IPooledObjectPolicy<IModel>, ChannelPooledObjectPolicy>();
+builder.Services.AddSingleton<IRabbitManager, RabbitManager>();
 
 // Cache
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -77,7 +83,6 @@ builder.Services.AddAuthentication("BearerAuthentication")
 // Services
 builder.Services.AddScoped<KeysService>();
 builder.Services.AddScoped<PaymentsService>();
-builder.Services.AddScoped<MessageService>();
 
 // Repositories
 builder.Services.AddScoped<AuthRepository>();
@@ -87,7 +92,13 @@ builder.Services.AddScoped<AccountsRepository>();
 builder.Services.AddScoped<PaymentsRepository>();
 builder.Services.AddScoped<CacheRepository>();
 
+// Helpers
+
 var app = builder.Build();
+
+// // Queue
+// var rabbitManager = app.Services.GetRequiredService<IRabbitManager>();
+// rabbitManager.QueueDeclare("payments", true, false, false, null);
 
 // Monitoring and Metrics
 app.UseMetricServer();
