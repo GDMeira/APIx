@@ -37,8 +37,8 @@ public partial class PaymentsService(UsersRepository usersRepository,
         payment.PaymentProviderAccountId = accountDB.Id;
         await CheckIdempotence(payment);
         Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
-        Console.WriteLine($"Payment published {paymentDB.Id} to payments queue {paymentDB.PixKey.Value}");
-        _messagePublisher.Publish(paymentDB.Id, "payments");
+        string queue = "payments";
+        _messagePublisher.Publish(paymentDB.Id, queue);
         
         return new ResPostPaymentsDTO(paymentDB);;
     }

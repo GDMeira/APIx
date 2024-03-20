@@ -8,17 +8,27 @@ public class PaymentsRepository(AppDBContext appDBContext, CacheRepository cache
 {
     private readonly AppDBContext _appDBContext = appDBContext;
     private readonly CacheRepository _cacheRepository = cacheRepository;
+
     public async Task<Payment> CreatePayment(Payment payment)
     {
-        await _appDBContext.Payment.AddAsync(payment);
+        await _appDBContext.Payment
+            .AddAsync(payment);
         await _appDBContext.SaveChangesAsync();
 
-        await _cacheRepository
-            .SetCachedData($"paymentIdempotence-{payment.PixKeyId}:{payment.PaymentProviderAccountId}:{payment.Amount}", payment, TimeSpan.FromSeconds(30));
-        await _cacheRepository
-            .SetCachedData($"payment-{payment.Id}", payment, TimeSpan.FromMinutes(2));
+        var paymentDB = await _appDBContext.Payment
+            .AsSplitQuery()
+            .Include(p => p.PixKey)
+            .Include(p => p.PixKey.PaymentProviderAccount)
+            .Include(p => p.PixKey.PaymentProviderAccount.PaymentProvider)
+            .Include(p => p.PaymentProviderAccount)
+            .FirstAsync(p => p.Id == payment.Id);
 
-        return payment;
+        await _cacheRepository
+            .SetCachedData($"paymentIdempotence-{paymentDB.PixKeyId}:{paymentDB.PaymentProviderAccountId}:{paymentDB.Amount}", new { Id = payment.Id }, TimeSpan.FromSeconds(30));
+        await _cacheRepository
+            .SetCachedData($"payment-{paymentDB.Id}", paymentDB, TimeSpan.FromMinutes(2));
+
+        return paymentDB;
     }
 
     public async Task<Payment?> RetrievePaymentByValueAndPixKeyAndAccount(Payment payment)
