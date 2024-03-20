@@ -48,6 +48,11 @@ services:
       - 5045:5045
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - Database__Host=postgres
+      - Database__Port=5432
+      - Database__Name=APIx_DB
+      - QueueSettings__HostName=rabbitmq
+      - Cache__Host=redis
     depends_on:
       - migrate
     healthcheck:
