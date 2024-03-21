@@ -12,7 +12,13 @@ namespace APIx.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            
+            migrationBuilder.AddColumn<string>(
+                name: "PostConcilliationUrl",
+                table: "PaymentProvider",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
             migrationBuilder.CreateTable(
                 name: "Concilliation",
                 columns: table => new
@@ -47,6 +53,10 @@ namespace APIx.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Concilliation");
+
+            migrationBuilder.DropColumn(
+                name: "PostConcilliationUrl",
+                table: "PaymentProvider");
         }
     }
 }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIx.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240321213908_AddConcilliation")]
+    [Migration("20240321225955_AddConcilliation")]
     partial class AddConcilliation
     {
         /// <inheritdoc />
@@ -122,6 +122,10 @@ namespace APIx.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PatchPaymentUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PostConcilliationUrl")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -260,7 +264,7 @@ namespace APIx.Migrations
             modelBuilder.Entity("APIx.Models.Concilliation", b =>
                 {
                     b.HasOne("APIx.Models.PaymentProvider", "PaymentProvider")
-                        .WithMany()
+                        .WithMany("Concilliations")
                         .HasForeignKey("PaymentProviderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -319,6 +323,8 @@ namespace APIx.Migrations
 
             modelBuilder.Entity("APIx.Models.PaymentProvider", b =>
                 {
+                    b.Navigation("Concilliations");
+
                     b.Navigation("PaymentProviderAccounts");
                 });
 

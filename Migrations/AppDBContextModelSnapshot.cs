@@ -122,6 +122,10 @@ namespace APIx.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PostConcilliationUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("PostPaymentUrl")
                         .IsRequired()
                         .HasColumnType("text");
@@ -256,8 +260,8 @@ namespace APIx.Migrations
 
             modelBuilder.Entity("APIx.Models.Concilliation", b =>
                 {
-                   b.HasOne("APIx.Models.PaymentProvider", "PaymentProvider")
-                        .WithMany()
+                    b.HasOne("APIx.Models.PaymentProvider", "PaymentProvider")
+                        .WithMany("Concilliations")
                         .HasForeignKey("PaymentProviderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -316,6 +320,8 @@ namespace APIx.Migrations
 
             modelBuilder.Entity("APIx.Models.PaymentProvider", b =>
                 {
+                    b.Navigation("Concilliations");
+
                     b.Navigation("PaymentProviderAccounts");
                 });
 
