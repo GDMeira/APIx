@@ -40,7 +40,7 @@ public partial class PaymentsService(UsersRepository usersRepository,
         string queue = "payments";
         _messagePublisher.Publish(paymentDB.Id, queue);
         
-        return new ResPostPaymentsDTO(paymentDB);;
+        return new ResPostPaymentsDTO(paymentDB);
     }
 
     public async Task<User> ValidateUser(string userCpf)

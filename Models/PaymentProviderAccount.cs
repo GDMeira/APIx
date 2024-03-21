@@ -24,4 +24,7 @@ public class PaymentProviderAccount(string number, string agency)
 
     [JsonIgnore]
     public ICollection<Payment> Payments { get; set; } = null!;
+
+    [JsonIgnore]
+    public ICollection<Concilliation> Concilliations { get; set; } = null!;
 }

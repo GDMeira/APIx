@@ -88,6 +88,7 @@ builder.Services.AddAuthentication("BearerAuthentication")
 // Services
 builder.Services.AddScoped<KeysService>();
 builder.Services.AddScoped<PaymentsService>();
+builder.Services.AddScoped<ConcilliationService>();
 
 // Repositories
 builder.Services.AddScoped<AuthRepository>();
