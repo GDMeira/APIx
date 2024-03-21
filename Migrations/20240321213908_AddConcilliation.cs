@@ -12,26 +12,22 @@ namespace APIx.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            
             migrationBuilder.CreateTable(
                 name: "Concilliation",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     FileUrl = table.Column<string>(type: "text", nullable: false),
                     PaymentProviderId = table.Column<int>(type: "integer", nullable: false),
-                    PaymentProviderAccountId = table.Column<int>(type: "integer", nullable: true)
+                    Status = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Concilliation", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Concilliation_PaymentProviderAccount_PaymentProviderAccount~",
-                        column: x => x.PaymentProviderAccountId,
-                        principalTable: "PaymentProviderAccount",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Concilliation_PaymentProvider_PaymentProviderId",
                         column: x => x.PaymentProviderId,
@@ -39,11 +35,6 @@ namespace APIx.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Concilliation_PaymentProviderAccountId",
-                table: "Concilliation",
-                column: "PaymentProviderAccountId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Concilliation_PaymentProviderId",

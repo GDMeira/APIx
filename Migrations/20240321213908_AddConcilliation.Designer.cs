@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIx.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240321211256_AddConcilliation")]
+    [Migration("20240321213908_AddConcilliation")]
     partial class AddConcilliation
     {
         /// <inheritdoc />
@@ -34,24 +34,27 @@ namespace APIx.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("FileUrl")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("PaymentProviderAccountId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("PaymentProviderId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PaymentProviderAccountId");
 
                     b.HasIndex("PaymentProviderId");
 
@@ -256,10 +259,6 @@ namespace APIx.Migrations
 
             modelBuilder.Entity("APIx.Models.Concilliation", b =>
                 {
-                    b.HasOne("APIx.Models.PaymentProviderAccount", null)
-                        .WithMany("Concilliations")
-                        .HasForeignKey("PaymentProviderAccountId");
-
                     b.HasOne("APIx.Models.PaymentProvider", "PaymentProvider")
                         .WithMany()
                         .HasForeignKey("PaymentProviderId")
@@ -325,8 +324,6 @@ namespace APIx.Migrations
 
             modelBuilder.Entity("APIx.Models.PaymentProviderAccount", b =>
                 {
-                    b.Navigation("Concilliations");
-
                     b.Navigation("Payments");
 
                     b.Navigation("PixKeys");

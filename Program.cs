@@ -97,6 +97,7 @@ builder.Services.AddScoped<KeysRepository>();
 builder.Services.AddScoped<AccountsRepository>();
 builder.Services.AddScoped<PaymentsRepository>();
 builder.Services.AddScoped<CacheRepository>();
+builder.Services.AddScoped<ConcilliationRepository>();
 
 // Helpers
 
