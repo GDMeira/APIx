@@ -39,9 +39,6 @@ namespace APIx.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("PaymentProviderAccountId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("PaymentProviderId")
                         .HasColumnType("integer");
 
@@ -55,8 +52,6 @@ namespace APIx.Migrations
                         .HasDefaultValueSql("NOW()");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PaymentProviderAccountId");
 
                     b.HasIndex("PaymentProviderId");
 
@@ -261,11 +256,7 @@ namespace APIx.Migrations
 
             modelBuilder.Entity("APIx.Models.Concilliation", b =>
                 {
-                    b.HasOne("APIx.Models.PaymentProviderAccount", null)
-                        .WithMany("Concilliations")
-                        .HasForeignKey("PaymentProviderAccountId");
-
-                    b.HasOne("APIx.Models.PaymentProvider", "PaymentProvider")
+                   b.HasOne("APIx.Models.PaymentProvider", "PaymentProvider")
                         .WithMany()
                         .HasForeignKey("PaymentProviderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -330,8 +321,6 @@ namespace APIx.Migrations
 
             modelBuilder.Entity("APIx.Models.PaymentProviderAccount", b =>
                 {
-                    b.Navigation("Concilliations");
-
                     b.Navigation("Payments");
 
                     b.Navigation("PixKeys");

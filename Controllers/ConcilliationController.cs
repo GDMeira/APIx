@@ -20,7 +20,7 @@ public class ConcilliationController(ConcilliationService concilliationService) 
             .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
         int paymentProviderId = int.Parse(claim ?? "0");
         string file = reqPostConcilliationDTO.GetFile();
-        string response = await _concilliationService.PostConcilliation(file, paymentProviderId);
+        var response = await _concilliationService.PostConcilliation(file, paymentProviderId);
 
         return CreatedAtAction(nameof(Post), response);
     }
