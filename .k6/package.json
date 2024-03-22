@@ -4,6 +4,7 @@
   "scripts": {
     "seed": "node ./seed/seedUser.js && node ./seed/seedPaymentProvider.js",
     "seed:pix-key": "npm run seed && node ./seed/seedPixKey.js",
+    "seed:payment": "node ./seed/seedPayments.js",
     "test:post-keys": "k6 run ./tests/postKeysTest.js",
     "test:post-payments": "k6 run ./tests/postPaymentsTest.js",
     "test:get-keys": "k6 run ./tests/getKeysTest.js"

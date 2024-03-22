@@ -16,10 +16,10 @@ public partial class ConcilliationService(ConcilliationRepository concilliationR
     private readonly IRabbitManager _messagePublisher = messagePublisher;
     public async Task<ResPostConcilliationDTO> PostConcilliation(string fileUrl, int paymentProviderId)
     {
-        Concilliation? concilliation = await _concilliationRepository
-            .RetrieveConcilliationByFileUrl(fileUrl);
+        // Concilliation? concilliation = await _concilliationRepository
+        //     .RetrieveConcilliationByFileUrl(fileUrl);
 
-        if (concilliation != null) throw new ConflictOnCreation("Concilliation already exists.");
+        // if (concilliation != null) throw new ConflictOnCreation("Concilliation already exists.");
 
         Concilliation newConcilliation = new Concilliation(fileUrl, paymentProviderId);
         await _concilliationRepository.CreateConcilliation(newConcilliation);
