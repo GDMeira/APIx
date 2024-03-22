@@ -118,6 +118,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Queue
+var rabbitManager = app.Services.GetRequiredService<IRabbitManager>();
+rabbitManager.QueueDeclare("payments", true, false, false, null);
+rabbitManager.QueueDeclare("concilliations", true, false, false, null);
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

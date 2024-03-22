@@ -14,7 +14,7 @@ public partial class ConcilliationService(ConcilliationRepository concilliationR
 {
     private readonly ConcilliationRepository _concilliationRepository = concilliationRepository;
     private readonly IRabbitManager _messagePublisher = messagePublisher;
-    public async Task<Concilliation> PostConcilliation(string fileUrl, int paymentProviderId)
+    public async Task<ResPostConcilliationDTO> PostConcilliation(string fileUrl, int paymentProviderId)
     {
         Concilliation? concilliation = await _concilliationRepository
             .RetrieveConcilliationByFileUrl(fileUrl);
@@ -23,8 +23,10 @@ public partial class ConcilliationService(ConcilliationRepository concilliationR
 
         Concilliation newConcilliation = new Concilliation(fileUrl, paymentProviderId);
         await _concilliationRepository.CreateConcilliation(newConcilliation);
-        //mandar concilliation para o rabbit
+        string queueName = "concilliations";
+        _messagePublisher.Publish(newConcilliation.Id, queueName);
+        ResPostConcilliationDTO response = new ResPostConcilliationDTO(newConcilliation);
         
-        return newConcilliation;
+        return response;
     }
 }
