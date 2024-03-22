@@ -11,15 +11,11 @@ const knexx = new knex({
 });
 
 const PAYMENTS = 1_000_000;
-const ERASE_DATA = false;
+const ERASE_DATA = true;
 
 async function run() {
     if (ERASE_DATA) {
-        await knexx("PixKey").del();
-        await knexx("PaymentProviderAccount").del();
         await knexx("Payment").del();
-        await knexx("User").del();
-        await knexx("PaymentProvider").del();
     }
 
     const start = new Date();
@@ -27,8 +23,9 @@ async function run() {
     // Payments
     const payments = await generatePayment();
     await populatePayment(payments);
+    const paymentsDB = await knexx.select('Id', 'Status').table('Payment');
     generateJson("./seed/existing_payments.json", payments);
-    generateNDJSON("./seed/existing_payments.ndjson", payments);
+    generateNDJSON("./seed/existing_payments.ndjson", paymentsDB);
 
     console.log("Closing DB connection...");
     await knexx.destroy();

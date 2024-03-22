@@ -1,5 +1,6 @@
 using APIx.Data;
 using APIx.Models;
+using APIx.RequestDTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace APIx.Repositories;
@@ -21,10 +22,11 @@ public class ConcilliationRepository(AppDBContext appDBContext, CacheRepository 
         return concilliation;
     }
 
-    public async Task<Concilliation?> RetrieveConcilliationByFileUrl(string fileUrl)
+    public async Task<Concilliation?> RetrieveConcilliationByDateAndProvider(Concilliation concilliation)
     {
         Concilliation? concilliationDB = await _appDBContext.Concilliation
-            .FirstOrDefaultAsync(c => c.FileUrl == fileUrl);
+            .FirstOrDefaultAsync(c => c.Date == concilliation.Date 
+                && c.PaymentProviderId == concilliation.PaymentProviderId);
 
         return concilliationDB;
     }

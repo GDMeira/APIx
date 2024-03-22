@@ -14,14 +14,15 @@ public partial class ConcilliationService(ConcilliationRepository concilliationR
 {
     private readonly ConcilliationRepository _concilliationRepository = concilliationRepository;
     private readonly IRabbitManager _messagePublisher = messagePublisher;
-    public async Task<ResPostConcilliationDTO> PostConcilliation(string fileUrl, int paymentProviderId)
+    public async Task<ResPostConcilliationDTO> PostConcilliation(ReqPostConcilliationDTO req, int paymentProviderId)
     {
-        // Concilliation? concilliation = await _concilliationRepository
-        //     .RetrieveConcilliationByFileUrl(fileUrl);
+        Concilliation newConcilliation = new Concilliation(req.GetFile(), req.GetPostback(), req.GetDate(), paymentProviderId);
+        Concilliation? concilliationDB = await _concilliationRepository
+            .RetrieveConcilliationByDateAndProvider(newConcilliation);
 
-        // if (concilliation != null) throw new ConflictOnCreation("Concilliation already exists.");
+        if (concilliationDB != null) throw new ConflictOnCreationException("Concilliation already exists.");
 
-        Concilliation newConcilliation = new Concilliation(fileUrl, paymentProviderId);
+        Console.WriteLine("Concilliation date: " + newConcilliation.Date.ToString());
         await _concilliationRepository.CreateConcilliation(newConcilliation);
         string queueName = "concilliations";
         _messagePublisher.Publish(newConcilliation.Id, queueName);

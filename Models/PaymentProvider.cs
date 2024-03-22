@@ -13,7 +13,6 @@ public class PaymentProvider(string token, string name)
     public string Name { get; set; } = name;
     public string PostPaymentUrl { get; set; } = "/payments/pix";
     public string PatchPaymentUrl { get; set; } = "/payments/pix";
-    public string PostConcilliationUrl { get; set; } = "/concilliation/pix";
 
     [JsonIgnore]
     public ICollection<PaymentProviderAccount> PaymentProviderAccounts { get; set; } = null!;

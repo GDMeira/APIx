@@ -3,3 +3,4 @@ obj/
 **/.env
 **/node_modules
 .k6/seed/*.json
+.k6/seed/*.ndjson
