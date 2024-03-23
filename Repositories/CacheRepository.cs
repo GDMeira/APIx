@@ -29,7 +29,12 @@ public class CacheRepository(IDistributedCache cache)
             AbsoluteExpirationRelativeToNow = expiration ?? TimeSpan.FromMinutes(5)
         };
 
-        var serializedData = JsonConvert.SerializeObject(data);
+        JsonSerializerSettings settings = new()
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        };
+
+        var serializedData = JsonConvert.SerializeObject(data, settings);
 
         await _cache.SetStringAsync(key, serializedData, options);
     }

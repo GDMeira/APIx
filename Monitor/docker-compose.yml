@@ -56,6 +56,7 @@ services:
       - Cache__Host=redis
     depends_on:
       - migrate
+      - rabbitmq
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5045/health"]
       interval: 1m30s

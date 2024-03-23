@@ -88,6 +88,7 @@ builder.Services.AddAuthentication("BearerAuthentication")
 // Services
 builder.Services.AddScoped<KeysService>();
 builder.Services.AddScoped<PaymentsService>();
+builder.Services.AddScoped<ConcilliationService>();
 
 // Repositories
 builder.Services.AddScoped<AuthRepository>();
@@ -96,6 +97,7 @@ builder.Services.AddScoped<KeysRepository>();
 builder.Services.AddScoped<AccountsRepository>();
 builder.Services.AddScoped<PaymentsRepository>();
 builder.Services.AddScoped<CacheRepository>();
+builder.Services.AddScoped<ConcilliationRepository>();
 
 // Helpers
 
@@ -115,6 +117,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Queue
+var rabbitManager = app.Services.GetRequiredService<IRabbitManager>();
+rabbitManager.QueueDeclare("payments", true, false, false, null);
+rabbitManager.QueueDeclare("concilliations", true, false, false, null);
 
 app.UseHttpsRedirection();
 

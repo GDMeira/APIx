@@ -16,4 +16,7 @@ public class PaymentProvider(string token, string name)
 
     [JsonIgnore]
     public ICollection<PaymentProviderAccount> PaymentProviderAccounts { get; set; } = null!;
+
+    [JsonIgnore]
+    public ICollection<Concilliation> Concilliations { get; set; } = null!;
 }

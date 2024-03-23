@@ -38,9 +38,10 @@ public partial class PaymentsService(UsersRepository usersRepository,
         await CheckIdempotence(payment);
         Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
         string queue = "payments";
-        _messagePublisher.Publish(paymentDB.Id, queue);
+        bool headers = true;
+        _messagePublisher.Publish(paymentDB.Id, queue, headers);
         
-        return new ResPostPaymentsDTO(paymentDB);;
+        return new ResPostPaymentsDTO(paymentDB);
     }
 
     public async Task<User> ValidateUser(string userCpf)
