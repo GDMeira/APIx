@@ -10,30 +10,24 @@ public class RabbitManager(IOptions<QueueConfig> queueConfig, IPooledObjectPolic
 {
     private readonly QueueConfig _queueConfig = queueConfig.Value;
     private readonly DefaultObjectPool<IModel> _objectPool = new DefaultObjectPool<IModel>(objectPolicy, queueConfig.Value.MaxChannelCount);
-    public void Publish(int paymentId, string routingKey)
-    {
-        // ConnectionFactory factory = new()
-        // {
-        //     HostName = _queueConfig.HostName,
-        //     UserName = _queueConfig.UserName,
-        //     Password = _queueConfig.Password,
-        //     VirtualHost = _queueConfig.VirtualHost
-        // };
-        // IConnection connection = factory.CreateConnection();
-        // using IModel channel = connection.CreateModel();
-        using var channel = new PoolObject<IModel>(_objectPool);
 
-        var body = JsonSerializer.SerializeToUtf8Bytes(paymentId);
+    public void Publish(int Id, string routingKey, bool headers = false)
+    {
+        using var channel = new PoolObject<IModel>(_objectPool);
+        var body = JsonSerializer.SerializeToUtf8Bytes(Id);
         var properties = channel.Item.CreateBasicProperties();
-        properties.Headers = new Dictionary<string, object>()
+
+        if (headers)
         {
-            { "retry-count", 0 }
-        };
+            properties.Headers = new Dictionary<string, object>()
+            {
+                { "retry-count", 0 }
+            };
+        }
+
         properties.Persistent = true;
 
         channel.Item.BasicPublish("", routingKey, properties, body);
-
-        // connection.Close();
     }
 
     public QueueDeclareOk QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object>? arguments)

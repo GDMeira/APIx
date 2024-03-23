@@ -24,8 +24,13 @@ builder.Services.AddDbContext<AppDBContext>(opts =>
     string username = builder.Configuration["Database:Username"] ?? string.Empty;
     string database = builder.Configuration["Database:Name"] ?? string.Empty;
     string password = builder.Configuration["Database:Password"] ?? string.Empty;
+    string maxConnection = builder.Configuration["Database:MaxConnection"] ?? string.Empty;
+    string minConnection = builder.Configuration["Database:MinConnection"] ?? string.Empty;
+    string enlist = builder.Configuration["Database:Enlist"] ?? string.Empty;
 
-    string connectionString = $"Host={host};Port={port};Username={username};Password={password};Database={database}";
+    string connectionString = @$"Host={host};Port={port};Username={username};Password={password};
+        Database={database};Maximum Pool Size={maxConnection};Minimum Pool Size={minConnection};
+        Enlist={enlist};No Reset On Close=True;";
     opts.UseNpgsql(connectionString);
 });
 
@@ -83,6 +88,7 @@ builder.Services.AddAuthentication("BearerAuthentication")
 // Services
 builder.Services.AddScoped<KeysService>();
 builder.Services.AddScoped<PaymentsService>();
+builder.Services.AddScoped<ConcilliationService>();
 
 // Repositories
 builder.Services.AddScoped<AuthRepository>();
@@ -91,6 +97,7 @@ builder.Services.AddScoped<KeysRepository>();
 builder.Services.AddScoped<AccountsRepository>();
 builder.Services.AddScoped<PaymentsRepository>();
 builder.Services.AddScoped<CacheRepository>();
+builder.Services.AddScoped<ConcilliationRepository>();
 
 // Helpers
 
@@ -110,6 +117,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Queue
+var rabbitManager = app.Services.GetRequiredService<IRabbitManager>();
+rabbitManager.QueueDeclare("payments", true, false, false, null);
+rabbitManager.QueueDeclare("concilliations", true, false, false, null);
 
 app.UseHttpsRedirection();
 

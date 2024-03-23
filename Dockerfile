@@ -15,4 +15,10 @@ EXPOSE 5045
 ENV ASPNETCORE_URLS=http://+:5045
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 COPY --from=build /app ./
-ENTRYPOINT ["dotnet", "APIx.dll"]
+
+COPY /Monitor/startApix.sh /
+RUN apt-get update && apt-get install -y netcat-openbsd
+RUN chmod +x /startApix.sh
+
+# Defina o script de inicialização como o ponto de entrada
+ENTRYPOINT ["/startApix.sh"]

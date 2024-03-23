@@ -15,6 +15,8 @@ public class AppDBContext(DbContextOptions<AppDBContext> options) : DbContext(op
 
 	public DbSet<Payment> Payment { get; set; } = null!;
 
+	public DbSet<Concilliation> Concilliation { get; set; } = null!;
+
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -59,6 +61,15 @@ public class AppDBContext(DbContextOptions<AppDBContext> options) : DbContext(op
 			.HasDefaultValueSql("NOW()");
 
 		modelBuilder.Entity<Payment>()
+			.Property(p => p.UpdatedAt)
+			.HasDefaultValueSql("NOW()")
+			.ValueGeneratedOnUpdate();
+
+		modelBuilder.Entity<Concilliation>()
+			.Property(p => p.CreatedAt)
+			.HasDefaultValueSql("NOW()");
+
+		modelBuilder.Entity<Concilliation>()
 			.Property(p => p.UpdatedAt)
 			.HasDefaultValueSql("NOW()")
 			.ValueGeneratedOnUpdate();

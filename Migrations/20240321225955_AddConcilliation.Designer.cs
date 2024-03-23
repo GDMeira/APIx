@@ -3,6 +3,7 @@ using System;
 using APIx.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIx.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240321225955_AddConcilliation")]
+    partial class AddConcilliation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,19 +38,12 @@ namespace APIx.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
                     b.Property<string>("FileUrl")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("PaymentProviderId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Postback")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -126,6 +122,10 @@ namespace APIx.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PatchPaymentUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PostConcilliationUrl")
                         .IsRequired()
                         .HasColumnType("text");
 

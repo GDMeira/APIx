@@ -4,14 +4,11 @@ import { SharedArray } from 'k6/data';
 export const options = {
     scenarios: {
         contacts: {
-            executor: 'ramping-vus',
-            startVUs: 0,
-            stages: [
-                { duration: '30s', target: 50 },
-                { duration: '20s', target: 25 },
-                { duration: '10s', target: 0 },
-            ],
-            gracefulRampDown: '0s',
+            executor: 'constant-arrival-rate',
+            duration: '1m',
+            preAllocatedVUs: 100,
+            rate: 40000,
+            timeUnit: '1m'
         },
     }
 }
