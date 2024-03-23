@@ -1,6 +1,5 @@
 using APIx.Data;
 using APIx.Models;
-using APIx.RequestDTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace APIx.Repositories;
@@ -26,7 +25,8 @@ public class ConcilliationRepository(AppDBContext appDBContext, CacheRepository 
     {
         Concilliation? concilliationDB = await _appDBContext.Concilliation
             .FirstOrDefaultAsync(c => c.Date == concilliation.Date 
-                && c.PaymentProviderId == concilliation.PaymentProviderId);
+                && c.PaymentProviderId == concilliation.PaymentProviderId
+                && c.Status != "FAILED");
 
         return concilliationDB;
     }

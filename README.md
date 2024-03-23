@@ -32,7 +32,7 @@ dotnet watch
 6. Look and test the API documentation using Swagger. If you don't change the default port it can be acessed in [http://localhost:5045/swagger/index.html](http://localhost:5045/swagger/index.html).
 
 ## Monitoring the Application
-1. Acess [mock repository](https://github.com/GDMeira/PSP-Mock) and [payment consumer](https://github.com/GDMeira/PaymentQueueConsumer) to get the code for use and test the post payment endpoint. Unfortunaly the consumer docker image isn't connecting with RabbitMQ, but it works running locally.
+1. Acess [mock repository](https://github.com/GDMeira/PSP-Mock), [payment consumer](https://github.com/GDMeira/PaymentQueueConsumer) and [concilliation consumer](https://github.com/GDMeira/ConcilliationQueueConsumer) to get the code for use and test APIx endpoints. Unfortunaly the consumer docker images isn't connecting with RabbitMQ, but it works running locally.
 
 2. Build the app image using Docker (maintain the appsettings configuration for default connection with other containers and services):
 
@@ -106,4 +106,21 @@ export const options = {
         },
     }
 }
+
+9. To test the post concilliation endpoint run:
+
+```bash
+npm run seed:payment
 ```
+
+10. A .ndjson file will be generated in /.k6/seed. Use some platform (like google drive) to upload the file and generated an download link. You can change some data at the file to see the results in report. Use the download link to make a request in /Concilliation using swagger:
+
+```json
+{
+  "file": "https://drive.google.com/uc?export=download&id=1rPU132RV9BuJamLId-Yiy7YcZYiCzLxk",
+  "postBack": "http://psp-mock:5039/concilliation/pix", 
+  "date": "2024-03-22"
+}
+```
+
+11. Run ```docker logs psp-mock``` in a terminal to see the generated report. It uses to spend 3 minutes per report.
