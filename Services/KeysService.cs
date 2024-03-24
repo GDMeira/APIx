@@ -166,6 +166,40 @@ public partial class KeysService(UsersRepository usersRepository,
             throw new AppException(HttpStatusCode.Conflict, $"This key {pixKey.Value} already exists");
         }
     }
+
+    public async Task<ResGetKeysDTO> GetKeys(string type, string value)
+    {
+        ValidateKeyToRetrieval(type, value);
+        PixKey pixKey = await _keysRepository.RetrieveKeyByValue(value) ??
+            throw new NotFoundException("Key not found");
+
+        return new ResGetKeysDTO(pixKey);
+    }
+
+    public void ValidateKeyToRetrieval(string type, string value)
+    {
+        if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
+        {
+            throw new UnprocessableRouteException("Invalid type");
+        }
+        else if (type == "CPF" && !CpfRegex().IsMatch(value))
+        {
+            throw new UnprocessableRouteException("Invalid CPF");
+        }
+        else if (type == "Email" && !EmailRegex().IsMatch(value))
+        {
+            throw new UnprocessableRouteException("Invalid email");
+        }
+        else if (type == "Phone" && !PhoneRegex().IsMatch(value))
+        {
+            throw new UnprocessableRouteException("Invalid phone");
+        }
+        else if (type == "Random" && !RandomKeyRegex().IsMatch(value))
+        {
+            throw new UnprocessableRouteException("Invalid random key");
+        }
+    }
+
     [GeneratedRegex(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")]
     private static partial Regex EmailRegex();
 
@@ -177,38 +211,4 @@ public partial class KeysService(UsersRepository usersRepository,
 
     [GeneratedRegex(@"^[0-9]{11}$")]
     private static partial Regex CpfRegex();
-
-    public async Task<ResGetKeysDTO> GetKeys(string type, string value)
-    {
-        ValidateKeyToRetrieval(type, value);
-        PixKey pixKey = await _keysRepository.RetrieveKeyByValue(value) ??
-            throw new AppException(HttpStatusCode.NotFound, "Key not found");
-
-        return new ResGetKeysDTO(pixKey, pixKey.PaymentProviderAccount.User,
-                    pixKey.PaymentProviderAccount, pixKey.PaymentProviderAccount.PaymentProvider);
-    }
-
-    public void ValidateKeyToRetrieval(string type, string value)
-    {
-        if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid type");
-        }
-        else if (type == "CPF" && !CpfRegex().IsMatch(value))
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid CPF");
-        }
-        else if (type == "Email" && !EmailRegex().IsMatch(value))
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid email");
-        }
-        else if (type == "Phone" && !PhoneRegex().IsMatch(value))
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid phone");
-        }
-        else if (type == "Random" && !RandomKeyRegex().IsMatch(value))
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid random key");
-        }
-    }
 }

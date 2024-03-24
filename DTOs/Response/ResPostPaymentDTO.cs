@@ -23,6 +23,6 @@ public class ResPostPaymentsDTO(Payment payment)
 
     public class DestinyDTO(PixKey key)
     {
-        public KeyDTO Key { get; set; } = new KeyDTO(key.Type, key.Value);
+        public KeyDTO Key { get; set; } = new KeyDTO(key);
     }
 }
