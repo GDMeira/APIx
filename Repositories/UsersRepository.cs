@@ -10,6 +10,8 @@ public class UsersRepository(AppDBContext appDBContext)
 
     public async Task<User?> RetrieveUserByCpf(string userCpf)
     {
-        return await _appDBContext.User.FirstOrDefaultAsync(u => u.Cpf == userCpf);
+        return await _appDBContext.User
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Cpf == userCpf);
     }
 }

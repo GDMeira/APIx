@@ -2,8 +2,8 @@ using APIx.Models;
 
 namespace APIx.ResponseDTOs;
 
-public class KeyDTO(string type, string value)
+public class KeyDTO(PixKey pixKey)
 {
-    public string Type { get; set; } = type;
-    public string Value { get; set; } = value;
+    public string Type { get; set; } = pixKey.Type;
+    public string Value { get; set; } = pixKey.Value;
 }

@@ -21,32 +21,32 @@ public class BearerAuthenticationHandler(
     {
         if (!Request.Headers.ContainsKey("Authorization"))
         {            
-            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
+            return AuthenticateResult.Fail(new UnauthorizedException("Authorization is required."));
         }
         
         string? authorizationHeader = Request.Headers.Authorization;
         if (string.IsNullOrEmpty(authorizationHeader))
         {
-            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
+            return AuthenticateResult.Fail(new UnauthorizedException("Token is required."));
         }
         
         if (!authorizationHeader.StartsWith("bearer ", StringComparison.OrdinalIgnoreCase))
         {
-            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
+            return AuthenticateResult.Fail(new UnauthorizedException("Token is required."));
         }
         
         string token = authorizationHeader.Split(" ")[1]; //Bearer token
 
         if (string.IsNullOrEmpty(token))
         {
-            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
+            return AuthenticateResult.Fail(new UnauthorizedException("Token is required."));
         }
 
         PaymentProvider? paymentProvider = await _authRepository.RetrievePaymentProviderByToken(token);
         
         if (paymentProvider == null)
         {
-            return AuthenticateResult.Fail(new AppException(HttpStatusCode.Unauthorized, "Unauthorized"));
+            return AuthenticateResult.Fail(new UnauthorizedException("Token is required."));
         }
         
         var claims = new[]

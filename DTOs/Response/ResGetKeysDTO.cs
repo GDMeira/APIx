@@ -1,11 +1,9 @@
 using APIx.Models;
 
 namespace APIx.ResponseDTOs;
-public class ResGetKeysDTO(PixKey pixKey, User user,
-    PaymentProviderAccount paymentProviderAccount, PaymentProvider paymentProvider)
+public class ResGetKeysDTO(PixKey pixKey)
 {
-    public KeyDTO Key { get; set; } = new KeyDTO(pixKey.Type, pixKey.Value);
-    public FullUserDTO User { get; set; } = new FullUserDTO(user.Name, user.Cpf);
-    public FullAccountDTO Account { get; set; } = new FullAccountDTO(paymentProviderAccount.Number,
-        paymentProviderAccount.Agency, paymentProvider.Name, paymentProvider.Id.ToString());
+    public KeyDTO Key { get; set; } = new KeyDTO(pixKey);
+    public FullUserDTO User { get; set; } = new FullUserDTO(pixKey.PaymentProviderAccount.User);
+    public FullAccountDTO Account { get; set; } = new FullAccountDTO(pixKey.PaymentProviderAccount);
 }

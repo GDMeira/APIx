@@ -5,7 +5,7 @@ public class RandomKeyGenerator
     public static string GenerateRandomKey()
     {
         Random random = new();
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
         string key = "";
 
         for (int i = 0; i < 36; i++)

@@ -9,6 +9,8 @@ public class AuthRepository(AppDBContext appDBContext)
     private readonly AppDBContext _appDBContext = appDBContext;
     public async Task<PaymentProvider?> RetrievePaymentProviderByToken(string token)
     {
-        return await _appDBContext.PaymentProvider.FirstOrDefaultAsync(x => x.Token == token);
+        return await _appDBContext.PaymentProvider
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Token == token);
     }
 }

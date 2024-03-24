@@ -11,6 +11,7 @@ public class KeysRepository(AppDBContext appDBContext, CacheRepository cache)
     public async Task<PixKey[]> RetrieveKeysByUserId(int userId)
     {
         return await _appDBContext.PixKey
+        .AsNoTracking()
         .Include(p => p.PaymentProviderAccount)
         .Where(p => p.PaymentProviderAccount.UserId == userId)
         .ToArrayAsync();
@@ -34,26 +35,42 @@ public class KeysRepository(AppDBContext appDBContext, CacheRepository cache)
     }
     
 
-    public async Task<PixKey?> RetrieveKeyByValue(string value)
+    public async Task<PixKey?> RetrieveKeyByValue(string value, bool getSetCache = true)
     {
-        PixKey? cachedKey = await _cache.GetCachedData<PixKey>($"pixKey-{value}");
-        
-        if (cachedKey != null)
+        if (getSetCache)
         {
-            return cachedKey;
+            PixKey? keyCache = await _cache.GetCachedData<PixKey>($"pixKey-{value}");
+            if (keyCache != null) return keyCache;
         }
 
         PixKey? keyDB = await _appDBContext.PixKey
+            .AsNoTracking()
             .AsSplitQuery()
             .Include(p => p.PaymentProviderAccount.User)
             .Include(p => p.PaymentProviderAccount.PaymentProvider)
             .FirstOrDefaultAsync(p => p.Value == value);
 
-        if (keyDB != null)
+        if (keyDB != null && getSetCache)
         {
-            await _cache.SetCachedData($"pixKey-{value}", keyDB);
+            _ = _cache.SetCachedData($"pixKey-{value}", keyDB);
         }
 
         return keyDB;
     }
+
+    public async Task<int> CountKeysByUserId(int userId)
+    {
+        return await _appDBContext.PixKey
+            .AsNoTracking()
+            .CountAsync(p => p.PaymentProviderAccount.UserId == userId);
+    }
+
+    public async Task<int> CountKeysByUserIdAndProviderId(int userId, int providerId)
+    {
+        return await _appDBContext.PixKey
+            .AsNoTracking()
+            .CountAsync(p => p.PaymentProviderAccount.UserId == userId &&
+                p.PaymentProviderAccount.PaymentProviderId == providerId);
+    }
+
 }

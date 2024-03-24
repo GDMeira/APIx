@@ -2,13 +2,13 @@ using APIx.Models;
 
 namespace APIx.ResponseDTOs;
 
-public class FullAccountDTO(string number, string agency, string bankName, string bankId)
+public class FullAccountDTO(PaymentProviderAccount account)
 {
-    public string Number { get; set; } = number;
+    public string Number { get; set; } = account.Number;
 
-    public string Agency { get; set; } = agency;
+    public string Agency { get; set; } = account.Agency;
 
-    public string BankName { get; set; } = bankName;
+    public string BankName { get; set; } = account.PaymentProvider.Name;
 
-    public string BankId { get; set; } = bankId;
+    public string BankId { get; set; } = account.PaymentProviderId.ToString();
 }
