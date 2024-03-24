@@ -52,7 +52,7 @@ public class KeysRepository(AppDBContext appDBContext, CacheRepository cache)
 
         if (keyDB != null && getSetCache)
         {
-            await _cache.SetCachedData($"pixKey-{value}", keyDB);
+            _ = _cache.SetCachedData($"pixKey-{value}", keyDB);
         }
 
         return keyDB;

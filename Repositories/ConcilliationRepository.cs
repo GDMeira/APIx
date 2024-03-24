@@ -15,7 +15,7 @@ public class ConcilliationRepository(AppDBContext appDBContext, CacheRepository 
             .AddAsync(concilliation);
         await _appDBContext.SaveChangesAsync();
 
-        await _cacheRepository
+        _ = _cacheRepository
             .SetCachedData($"concilliation-{concilliation.Id}", concilliation);
 
         return concilliation;
