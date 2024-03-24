@@ -70,6 +70,10 @@ services:
       context: ../.
       dockerfile: Dockerfile.migrations
     container_name: migrate
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Database__Host=postgres
+      - Database__Port=5432
     depends_on:
       - postgres
 
