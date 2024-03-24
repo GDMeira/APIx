@@ -2,10 +2,10 @@ using APIx.Models;
 
 namespace APIx.ResponseDTOs;
 
-public class FullUserDTO(string name, string cpf)
+public class FullUserDTO(User user)
 {
-    public string Name { get; set; } = name;
-    public string MaskedCpf { get; set; } = MaskCpf(cpf);
+    public string Name { get; set; } = user.Name;
+    public string MaskedCpf { get; set; } = MaskCpf(user.Cpf);
 
     public static string MaskCpf(string cpf)
     {

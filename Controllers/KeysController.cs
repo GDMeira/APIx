@@ -33,7 +33,7 @@ public class KeysController(KeysService keysService) : ControllerBase
     {
         if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(value))
         {
-            throw new AppException(HttpStatusCode.BadRequest, "Type and value are required");
+            throw new UnprocessableRouteException("Type and value are required");
         }
         
         ResGetKeysDTO response = await _keysService.GetKeys(type, value);
