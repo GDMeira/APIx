@@ -7,10 +7,14 @@ namespace APIx.Repositories;
 public class AccountsRepository(AppDBContext appDBContext)
 {
     private readonly AppDBContext _appDBContext = appDBContext;
-    public async Task<PaymentProviderAccount?> RetrieveAccount(string number, string agency)
+    public async Task<PaymentProviderAccount?> RetrieveAccount(PaymentProviderAccount account)
     {
         return await _appDBContext.PaymentProviderAccount
-                        .FirstOrDefaultAsync(a => a.Number == number && a.Agency == agency);
+            .FirstOrDefaultAsync(
+                a => a.PaymentProviderId == account.PaymentProviderId 
+                && a.UserId == account.UserId
+                && a.Number == account.Number
+                && a.Agency == account.Agency);
     }
 
     public async Task<PaymentProviderAccount> CreateAccount(PaymentProviderAccount paymentProviderAccount)

@@ -55,7 +55,7 @@ public partial class PaymentsService(UsersRepository usersRepository,
     {
 
         PaymentProviderAccount? paymentProviderAccountFromDb = await _accountsRepository
-            .RetrieveAccount(paymentProviderAccount.Number, paymentProviderAccount.Agency);
+            .RetrieveAccount(paymentProviderAccount);
 
         if (paymentProviderAccountFromDb == null)
         {
