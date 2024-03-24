@@ -24,57 +24,93 @@ public partial class PaymentsService(UsersRepository usersRepository,
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postPaymentsDTO.GetDestinyPixKey();
         PixKey pixKeyDB = await ValidateKeyToRetrieval(pixKey.Type, pixKey.Value);
-        PaymentProviderAccount paymentProviderAccountOrigin = postPaymentsDTO.GetOriginPaymentProviderAccount();
-        if (paymentProviderAccountOrigin.Number == pixKeyDB.PaymentProviderAccount.Number &&
-            paymentProviderAccountOrigin.Agency == pixKeyDB.PaymentProviderAccount.Agency)
+        PaymentProviderAccount originAccount = postPaymentsDTO.GetOriginPaymentProviderAccount();
+        if (originAccount.Number == pixKeyDB.PaymentProviderAccount.Number &&
+            originAccount.Agency == pixKeyDB.PaymentProviderAccount.Agency)
         {
-            throw new AppException(HttpStatusCode.BadRequest, "Origin and destiny account cannot be the same");
+            throw new ForbiddenOperationException("Origin and destiny account cannot be the same");
         }
 
-        PaymentProviderAccount accountDB = await RetrieveOrCreateAccount(paymentProviderAccountOrigin, paymentProviderId, user.Id);
+        originAccount.UserId = user.Id;
+        originAccount.PaymentProviderId = paymentProviderId;
+        PaymentProviderAccount accountDB = await RetrieveOrCreateAccount(originAccount);
+        originAccount.User = user;
         Payment payment = postPaymentsDTO.GetPayment();
         payment.PixKeyId = pixKeyDB.Id;
         payment.PaymentProviderAccountId = accountDB.Id;
         await CheckIdempotence(payment);
-        Payment paymentDB = await _paymentsRepository.CreatePayment(payment);
+        Payment paymentDB = await _paymentsRepository.CreatePayment(payment, accountDB, pixKeyDB);
         string queue = "payments";
         bool headers = true;
         _messagePublisher.Publish(paymentDB.Id, queue, headers);
-        
+
         return new ResPostPaymentsDTO(paymentDB);
     }
 
     public async Task<User> ValidateUser(string userCpf)
     {
         return await _usersRepository.RetrieveUserByCpf(userCpf) ??
-            throw new AppException(HttpStatusCode.NotFound, "User not found");
+            throw new NotFoundException("User not found");
     }
 
-    public async Task<PaymentProviderAccount> RetrieveOrCreateAccount(PaymentProviderAccount paymentProviderAccount,
-        int paymentProviderId, int userId)
+    public async Task<PaymentProviderAccount> RetrieveOrCreateAccount(PaymentProviderAccount account)
     {
 
         PaymentProviderAccount? paymentProviderAccountFromDb = await _accountsRepository
-            .RetrieveAccount(paymentProviderAccount);
+            .RetrieveAccount(account);
 
         if (paymentProviderAccountFromDb == null)
         {
-            paymentProviderAccount.PaymentProviderId = paymentProviderId;
-            paymentProviderAccount.UserId = userId;
-
-            return await _accountsRepository.CreateAccount(paymentProviderAccount);
+            return await _accountsRepository.CreateAccount(account);
         }
 
-        if (paymentProviderAccountFromDb.PaymentProviderId != paymentProviderId)
+        if (paymentProviderAccountFromDb.PaymentProviderId != account.PaymentProviderId)
         {
-            throw new AppException(HttpStatusCode.BadRequest, "Account already exists with another payment provider");
+            throw new ConflictOnCreationException("Account already exists with another payment provider");
         }
-        else if (paymentProviderAccountFromDb.UserId != userId)
+        else if (paymentProviderAccountFromDb.UserId != account.UserId)
         {
-            throw new AppException(HttpStatusCode.BadRequest, "Account already exists with another user");
+            throw new ConflictOnCreationException("Account already exists with another user");
         }
 
         return paymentProviderAccountFromDb;
+    }
+
+    public async Task<PixKey> ValidateKeyToRetrieval(string type, string value)
+    {
+        if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
+        {
+            throw new UnprocessableEntryException("Invalid type");
+        }
+        else if (type == "CPF" && !CpfRegex().IsMatch(value))
+        {
+            throw new UnprocessableEntryException("Invalid CPF");
+        }
+        else if (type == "Email" && !EmailRegex().IsMatch(value))
+        {
+            throw new UnprocessableEntryException("Invalid email");
+        }
+        else if (type == "Phone" && !PhoneRegex().IsMatch(value))
+        {
+            throw new UnprocessableEntryException("Invalid phone");
+        }
+        else if (type == "Random" && !RandomKeyRegex().IsMatch(value))
+        {
+            throw new UnprocessableEntryException("Invalid random key");
+        }
+
+        return await _keysRepository.RetrieveKeyByValue(value) ??
+            throw new NotFoundException("Key not found");
+    }
+
+    public async Task CheckIdempotence(Payment payment)
+    {
+        Payment? paymentFromDb = await _paymentsRepository.RetrievePaymentByValueAndPixKeyAndAccount(payment);
+
+        if (paymentFromDb != null)
+        {
+            throw new ForbiddenOperationException("Payment already exists");
+        }
     }
 
     [GeneratedRegex(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")]
@@ -88,41 +124,4 @@ public partial class PaymentsService(UsersRepository usersRepository,
 
     [GeneratedRegex(@"^[0-9]{11}$")]
     private static partial Regex CpfRegex();
-
-   public async Task<PixKey> ValidateKeyToRetrieval(string type, string value)
-    {
-        if (type != "CPF" && type != "Email" && type != "Phone" && type != "Random")
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid type");
-        }
-        else if (type == "CPF" && !CpfRegex().IsMatch(value))
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid CPF");
-        }
-        else if (type == "Email" && !EmailRegex().IsMatch(value))
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid email");
-        }
-        else if (type == "Phone" && !PhoneRegex().IsMatch(value))
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid phone");
-        }
-        else if (type == "Random" && !RandomKeyRegex().IsMatch(value))
-        {
-            throw new AppException(HttpStatusCode.UnprocessableContent, "Invalid random key");
-        }
-
-        return await _keysRepository.RetrieveKeyByValue(value) ??
-            throw new AppException(HttpStatusCode.NotFound, "Key not found");
-    }    
-
-    public async Task CheckIdempotence(Payment payment)
-    {
-        Payment? paymentFromDb = await _paymentsRepository.RetrievePaymentByValueAndPixKeyAndAccount(payment);
-
-        if (paymentFromDb != null)
-        {
-            throw new AppException(HttpStatusCode.BadRequest, "Payment already exists");
-        }
-    }
 }

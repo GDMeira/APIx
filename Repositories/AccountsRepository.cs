@@ -10,6 +10,8 @@ public class AccountsRepository(AppDBContext appDBContext)
     public async Task<PaymentProviderAccount?> RetrieveAccount(PaymentProviderAccount account)
     {
         return await _appDBContext.PaymentProviderAccount
+            .AsNoTracking()
+            .Include(a => a.PaymentProvider)
             .FirstOrDefaultAsync(
                 a => a.PaymentProviderId == account.PaymentProviderId 
                 && a.UserId == account.UserId
@@ -19,9 +21,9 @@ public class AccountsRepository(AppDBContext appDBContext)
 
     public async Task<PaymentProviderAccount> CreateAccount(PaymentProviderAccount paymentProviderAccount)
     {
-        var entry = _appDBContext.PaymentProviderAccount.Add(paymentProviderAccount);
+        await _appDBContext.PaymentProviderAccount.AddAsync(paymentProviderAccount);
         await _appDBContext.SaveChangesAsync();
 
-        return entry.Entity;
+        return paymentProviderAccount;
     }
 }
