@@ -34,7 +34,7 @@ public partial class PaymentsService(UsersRepository usersRepository,
         originAccount.UserId = user.Id;
         originAccount.PaymentProviderId = paymentProviderId;
         PaymentProviderAccount accountDB = await RetrieveOrCreateAccount(originAccount);
-        originAccount.User = user;
+        accountDB.User = user;
         Payment payment = postPaymentsDTO.GetPayment();
         payment.PixKeyId = pixKeyDB.Id;
         payment.PaymentProviderAccountId = accountDB.Id;
