@@ -31,6 +31,7 @@ public partial class KeysService(UsersRepository usersRepository,
         {
             pixKey.PaymentProviderAccountId = paymentProviderAccountDB.Id;
             newPixKey = await CreateKey(pixKey);
+            newPixKey.PaymentProviderAccount = paymentProviderAccountDB;
         }
         else
         {
@@ -110,7 +111,7 @@ public partial class KeysService(UsersRepository usersRepository,
         {
             try
             {
-                pixKey.Value = RandomKeyGenerator.GenerateRandomKey();
+                pixKey.Value = Guid.NewGuid().ToString();
                 return await _keysRepository.CreateKey(pixKey);
             }
             catch (Exception)
@@ -135,7 +136,7 @@ public partial class KeysService(UsersRepository usersRepository,
         {
             try
             {
-                pixKey.Value = RandomKeyGenerator.GenerateRandomKey();
+                pixKey.Value = Guid.NewGuid().ToString();
                 return await _keysRepository.CreateKey(pixKey, account);
             }
             catch (Exception)

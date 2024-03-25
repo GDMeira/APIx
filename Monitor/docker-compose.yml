@@ -30,11 +30,11 @@ services:
     image: postgres:latest
     container_name: postgres
     ports:
-      - 5433:5432 # Map host port 5433 to container port 5432 (default for postgres)
+      - 5433:5432 
     environment:
-      - POSTGRES_PASSWORD=postgres # Set password for postgres user (replace with desired password)
-      - POSTGRES_USER=postgres # Default postgres user
-      - POSTGRES_DB=postgres # Default postgres database
+      - POSTGRES_PASSWORD=postgres 
+      - POSTGRES_USER=postgres 
+      - POSTGRES_DB=postgres 
     volumes:
       - postgres_data:/var/lib/postgresql/data
     shm_size: 1024mb
