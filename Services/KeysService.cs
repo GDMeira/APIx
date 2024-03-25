@@ -63,9 +63,12 @@ public partial class KeysService(UsersRepository usersRepository,
             throw new UnprocessableEntryException("Invalid phone");
         }
 
-        PixKey? pixKeyDB = await _keysRepository.RetrieveKeyByValue(pixKey.Value, getSetCache: false);
-        if (pixKeyDB != null)
-            throw new ForbiddenOperationException("Key already exists");
+        if (pixKey.Type != "Random")
+        {
+            PixKey? pixKeyDB = await _keysRepository.RetrieveKeyByValue(pixKey.Value, getSetCache: false);
+            if (pixKeyDB != null)
+                throw new ForbiddenOperationException("Key already exists");
+        }
 
         int totalPixKeys = await _keysRepository.CountKeysByUserId(user.Id);
 
