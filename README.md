@@ -4,7 +4,7 @@ The APIx offers services to Payment Providers (PSPs) create pix keys, consult pi
 
 ## About
 
-This API allows PSPs to create pix keys, specifying pix key and value, user CPF. PSPs can also consult about a pix key, receiving information about the account, PSP and user linked to this pix key. Finally, the PSP can  easily make a transaction by pix.
+This API enables Payment Service Providers (PSPs) to create PIX keys, specifying the PIX key and value, as well as the user's CPF. PSPs can also inquire about a PIX key, receiving information about the associated account, PSP, and user. The PSP can easily initiate a PIX transaction, which is then queued and managed by RabbitMQ. The payment consumer will process the transaction and send a message to the PSP, reporting the payment status. Finally, the PSP can verify if its database payment status is up to date with the APIx database using the reconciliation endpoint.
 
 ## Running for Development
 

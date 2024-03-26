@@ -1,7 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace APIx.Models;
 
+[Index("Cpf", Name = "AK_User_Cpf_Index", IsUnique = true)]
 public class User(string cpf, string name)
 {
     public int Id { get; set; }

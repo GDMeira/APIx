@@ -20,24 +20,13 @@ public partial class KeysService(UsersRepository usersRepository,
         string userCpf = postKeysDTO.GetUserCpf();
         User user = await ValidateUser(userCpf);
         PixKey pixKey = postKeysDTO.GetPixKey();
-        await ValidateKeyToCreation(pixKey, user, paymentProviderId);
+        ValidateInputKey(pixKey, user);
         PaymentProviderAccount receivedAccount = postKeysDTO.GetPaymentProviderAccount();
         receivedAccount.PaymentProviderId = paymentProviderId;
         receivedAccount.UserId = user.Id;
         PaymentProviderAccount? paymentProviderAccountDB = await RetrieveAccount(receivedAccount);
-        PixKey newPixKey;
 
-        if (paymentProviderAccountDB != null)
-        {
-            pixKey.PaymentProviderAccountId = paymentProviderAccountDB.Id;
-            newPixKey = await CreateKey(pixKey);
-        }
-        else
-        {
-            newPixKey = await CreateKey(pixKey, receivedAccount);
-        }
-
-        var response = new ResPostKeysDTO(newPixKey, user);
+        ResPostKeysDTO response = await CreateKeyTransaction(pixKey, user, paymentProviderAccountDB, receivedAccount);
 
         return response;
     }
@@ -48,7 +37,7 @@ public partial class KeysService(UsersRepository usersRepository,
             throw new NotFoundException("User not found");
     }
 
-    public async Task ValidateKeyToCreation(PixKey pixKey, User user, int paymentProviderId)
+    public void ValidateInputKey(PixKey pixKey, User user)
     {
         if (pixKey.Type == "CPF" && pixKey.Value != user.Cpf)
         {
@@ -62,10 +51,16 @@ public partial class KeysService(UsersRepository usersRepository,
         {
             throw new UnprocessableEntryException("Invalid phone");
         }
+    }
 
-        PixKey? pixKeyDB = await _keysRepository.RetrieveKeyByValue(pixKey.Value, getSetCache: false);
-        if (pixKeyDB != null)
-            throw new ForbiddenOperationException("Key already exists");
+    public async Task ValidateKeyToCreation(PixKey pixKey, User user, int paymentProviderId)
+    {
+        if (pixKey.Type != "Random")
+        {
+            PixKey? pixKeyDB = await _keysRepository.RetrieveKeyByValue(pixKey.Value, getSetCache: false);
+            if (pixKeyDB != null)
+                throw new ForbiddenOperationException("Key already exists");
+        }
 
         int totalPixKeys = await _keysRepository.CountKeysByUserId(user.Id);
 
@@ -107,7 +102,7 @@ public partial class KeysService(UsersRepository usersRepository,
         {
             try
             {
-                pixKey.Value = RandomKeyGenerator.GenerateRandomKey();
+                pixKey.Value = Guid.NewGuid().ToString();
                 return await _keysRepository.CreateKey(pixKey);
             }
             catch (Exception)
@@ -132,7 +127,7 @@ public partial class KeysService(UsersRepository usersRepository,
         {
             try
             {
-                pixKey.Value = RandomKeyGenerator.GenerateRandomKey();
+                pixKey.Value = Guid.NewGuid().ToString();
                 return await _keysRepository.CreateKey(pixKey, account);
             }
             catch (Exception)
@@ -144,6 +139,36 @@ public partial class KeysService(UsersRepository usersRepository,
         return await _keysRepository.CreateKey(pixKey, account);
     }
 
+    public async Task<ResPostKeysDTO> CreateKeyTransaction(PixKey pixKey, User user,
+    PaymentProviderAccount? paymentProviderAccountDB, PaymentProviderAccount receivedAccount)
+    {
+        using var transaction = _keysRepository.BeginTransaction();
+        try
+        {
+            await ValidateKeyToCreation(pixKey, user, receivedAccount.PaymentProviderId);
+            PixKey newPixKey;
+
+            if (paymentProviderAccountDB != null)
+            {
+                pixKey.PaymentProviderAccountId = paymentProviderAccountDB.Id;
+                newPixKey = await CreateKey(pixKey);
+                newPixKey.PaymentProviderAccount = paymentProviderAccountDB;
+            }
+            else
+            {
+                newPixKey = await CreateKey(pixKey, receivedAccount);
+            }
+
+            transaction.Commit();
+
+            return new ResPostKeysDTO(newPixKey, user);
+        }
+        catch (Exception)
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
     public async Task<ResGetKeysDTO> GetKeys(string type, string value)
     {
         ValidateKeyToRetrieval(type, value);

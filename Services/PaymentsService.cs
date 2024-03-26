@@ -34,12 +34,11 @@ public partial class PaymentsService(UsersRepository usersRepository,
         originAccount.UserId = user.Id;
         originAccount.PaymentProviderId = paymentProviderId;
         PaymentProviderAccount accountDB = await RetrieveOrCreateAccount(originAccount);
-        originAccount.User = user;
+        accountDB.User = user;
         Payment payment = postPaymentsDTO.GetPayment();
         payment.PixKeyId = pixKeyDB.Id;
         payment.PaymentProviderAccountId = accountDB.Id;
-        await CheckIdempotence(payment);
-        Payment paymentDB = await _paymentsRepository.CreatePayment(payment, accountDB, pixKeyDB);
+        Payment paymentDB = await CreatePaymentTransaction(payment, accountDB, pixKeyDB);
         string queue = "payments";
         bool headers = true;
         _messagePublisher.Publish(paymentDB.Id, queue, headers);
@@ -110,6 +109,24 @@ public partial class PaymentsService(UsersRepository usersRepository,
         if (paymentFromDb != null)
         {
             throw new ForbiddenOperationException("Payment already exists");
+        }
+    }
+
+    public async Task<Payment> CreatePaymentTransaction(Payment payment, PaymentProviderAccount account, PixKey pixKey)
+    {
+        using var transaction = _paymentsRepository.BeginTransaction();
+        try
+        {
+            await CheckIdempotence(payment);
+            Payment paymentDB = await _paymentsRepository.CreatePayment(payment, account, pixKey);
+            transaction.Commit();
+
+            return paymentDB;
+        }
+        catch (Exception)
+        {
+            transaction.Rollback();
+            throw;
         }
     }
 
