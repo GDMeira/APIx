@@ -1,6 +1,8 @@
+using System.Data;
 using APIx.Data;
 using APIx.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace APIx.Repositories;
 
@@ -49,5 +51,10 @@ public class PaymentsRepository(AppDBContext appDBContext, CacheRepository cache
             );
 
         return paymentDB;
+    }
+
+    public IDbTransaction BeginTransaction()
+    {
+        return _appDBContext.Database.BeginTransaction().GetDbTransaction();
     }
 }

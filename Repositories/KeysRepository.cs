@@ -1,6 +1,8 @@
+using System.Data;
 using APIx.Data;
 using APIx.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace APIx.Repositories;
 
@@ -73,4 +75,8 @@ public class KeysRepository(AppDBContext appDBContext, CacheRepository cache)
                 p.PaymentProviderAccount.PaymentProviderId == providerId);
     }
 
+    public IDbTransaction BeginTransaction()
+    {
+        return _appDBContext.Database.BeginTransaction().GetDbTransaction();
+    }
 }

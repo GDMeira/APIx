@@ -26,11 +26,10 @@ builder.Services.AddDbContext<AppDBContext>(opts =>
     string password = builder.Configuration["Database:Password"] ?? string.Empty;
     string maxConnection = builder.Configuration["Database:MaxConnection"] ?? string.Empty;
     string minConnection = builder.Configuration["Database:MinConnection"] ?? string.Empty;
-    string enlist = builder.Configuration["Database:Enlist"] ?? string.Empty;
 
     string connectionString = @$"Host={host};Port={port};Username={username};Password={password};
         Database={database};Maximum Pool Size={maxConnection};Minimum Pool Size={minConnection};
-        Enlist={enlist};No Reset On Close=True;";
+        No Reset On Close=True;";
     opts.UseNpgsql(connectionString);
 });
 
